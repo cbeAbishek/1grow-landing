@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Clock, Tag, Calendar, ChevronRight, ChevronLeft, BookOpen, User, CheckCircle, ArrowRight } from 'lucide-react'
+import { Clock, Tag, Calendar, ChevronLeft, BookOpen, CheckCircle } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { SocialShare } from '@/components/content/social-share'
 import { NewsletterCta } from '@/components/content/newsletter-cta'
 import { RelatedPosts } from '@/components/content/related-posts'
+import { MarkdownRenderer } from '@/components/content/markdown-renderer'
 import { getBlogPost, getAllBlogPosts, extractToc } from '@/lib/content'
 import { generateMetadata as genMeta, articleSchema, breadcrumbSchema, webpageSchema, renderJsonLd } from '@/lib/seo'
 import { siteConfig } from '@/lib/seo-config'
@@ -33,25 +34,6 @@ export async function generateMetadata({
 
 export async function generateStaticParams() {
   return getAllBlogPosts().map((post) => ({ slug: post.slug }))
-}
-
-function renderMarkdown(content: string): string {
-  return content
-    .replace(/^### (.+)$/gm, '<h3 id="$1">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 id="$1">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 id="$1">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/gs, '<ul>$&</ul>')
-    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^/, '<p>')
-    .replace(/$/, '</p>')
-    .replace(/<p><h/g, '<h')
-    .replace(/<\/h(\d)><\/p>/g, '</h$1>')
-    .replace(/<p><ul>/g, '<ul>')
-    .replace(/<\/ul><\/p>/g, '</ul>')
 }
 
 export default async function BlogPostPage({
@@ -126,13 +108,15 @@ export default async function BlogPostPage({
           <article>
             <header className="mb-10">
               {post.featuredImage && (
-                <div className="mb-6 overflow-hidden rounded-2xl border border-border">
-                  <img
-                    src={post.featuredImage}
-                    alt={post.title}
-                    className="aspect-[16/9] w-full object-cover"
-                    loading="eager"
-                  />
+                <div className="mx-auto mb-8 w-full max-w-xl overflow-hidden rounded-2xl border border-border shadow-sm">
+                  <div className="aspect-square w-full overflow-hidden bg-muted">
+                    <img
+                      src={post.featuredImage}
+                      alt={post.title}
+                      className="h-full w-full object-cover"
+                      loading="eager"
+                    />
+                  </div>
                 </div>
               )}
               <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -188,6 +172,29 @@ export default async function BlogPostPage({
               </div>
             </header>
 
+            {toc.length > 0 && (
+              <nav
+                aria-label="Table of contents"
+                className="mb-10 rounded-2xl border border-border bg-card p-5"
+              >
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  On this page
+                </p>
+                <ol className="flex flex-wrap gap-2">
+                  {toc.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-brand/40 hover:bg-brand/5 hover:text-brand"
+                      >
+                        {item.title}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+
             <div className="mb-10 rounded-2xl border border-primary/20 bg-primary/5 p-5">
               <p className="text-xs font-semibold uppercase tracking-wider text-primary">TL;DR</p>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{post.description}</p>
@@ -202,10 +209,7 @@ export default async function BlogPostPage({
               )}
             </div>
 
-            <div
-              className="prose prose-gray dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
-            />
+            <MarkdownRenderer content={post.content} />
 
             {post.tags.length > 0 && (
               <div className="mt-12 rounded-2xl border border-border bg-card p-6">

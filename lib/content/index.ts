@@ -1,16 +1,32 @@
 import type { BlogPost, Tutorial, LegalPage, TocItem } from './types'
 
+function stripInlineMarkdown(text: string): string {
+  return text
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/~~([^~]+)~~/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+export function slugify(text: string): string {
+  return stripInlineMarkdown(text)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
 function extractToc(content: string): TocItem[] {
-  const headings = content.match(/^#{1,3}\s+.+$/gm) ?? []
+  const headings = content.match(/^#{1,4}\s+.+$/gm) ?? []
   return headings.map((h) => {
     const level = h.match(/^(#+)/)?.[1].length ?? 1
     const text = h.replace(/^#+\s+/, '')
-    const id = text
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-    return { id, title: text, level }
+    return { id: slugify(text), title: stripInlineMarkdown(text), level }
   })
 }
 

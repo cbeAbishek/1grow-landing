@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-label="Bar chart showing weekly admin hours dropping from 20 hours to 14 hours after using 1Grow">
+  <rect x="0" y="0" width="1200" height="600" rx="28" fill="#FAFAF8" stroke="#E8E4DF" stroke-width="2"/>
+  <text x="72" y="86" font-family="system-ui, -apple-system, sans-serif" font-size="38" font-weight="700" fill="#1A1A2E">Weekly admin hours</text>
+  <text x="72" y="126" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#6B7280">Training institute case study - before vs after 1Grow</text>
+
+  <g font-family="system-ui, -apple-system, sans-serif">
+    <line x1="150" y1="150" x2="150" y2="470" stroke="#E8E4DF" stroke-width="3"/>
+    <line x1="150" y1="470" x2="1080" y2="470" stroke="#E8E4DF" stroke-width="3"/>
+
+    <rect x="330" y="170" width="210" height="300" rx="16" fill="#E3E0DA"/>
+    <rect x="660" y="260" width="210" height="210" rx="16" fill="#F5A623"/>
+
+    <text x="435" y="140" font-size="34" font-weight="700" fill="#1A1A2E" text-anchor="middle">20 hrs</text>
+    <text x="765" y="230" font-size="34" font-weight="700" fill="#1A1A2E" text-anchor="middle">14 hrs</text>
+
+    <text x="435" y="520" font-size="26" font-weight="600" fill="#6B7280" text-anchor="middle">Before spreadsheets</text>
+    <text x="765" y="520" font-size="26" font-weight="600" fill="#B45309" text-anchor="middle">With 1Grow</text>
+
+    <rect x="255" y="248" width="360" height="10" rx="5" fill="#F5A623" opacity="0.85"/>
+    <text x="435" y="286" font-size="22" font-weight="600" fill="#B45309" text-anchor="middle">30% less admin time</text>
+  </g>
+</svg>

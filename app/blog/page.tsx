@@ -123,7 +123,7 @@ export default function BlogPage({
               className="group mb-8 flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-0.5 hover:border-border/80 hover:shadow-xl lg:flex-row"
             >
               {paginatedPosts[0].featuredImage && (
-                <div className="relative w-full shrink-0 overflow-hidden bg-muted lg:aspect-square lg:w-80 xl:w-96">
+                <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-muted sm:w-80 xl:w-96">
                   <img
                     src={paginatedPosts[0].featuredImage}
                     alt={paginatedPosts[0].title}

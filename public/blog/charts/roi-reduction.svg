@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-label="Line chart showing admin time reduction targets of 20 percent at 30 days, 40 percent at 60 days and 50 percent at 90 days">
+  <rect x="0" y="0" width="1200" height="600" rx="28" fill="#FAFAF8" stroke="#E8E4DF" stroke-width="2"/>
+  <text x="72" y="86" font-family="system-ui, -apple-system, sans-serif" font-size="38" font-weight="700" fill="#1A1A2E">Admin time saved with 1Grow</text>
+  <text x="72" y="126" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#6B7280">90-day ROI measurement plan - target milestones</text>
+
+  <g font-family="system-ui, -apple-system, sans-serif">
+    <line x1="150" y1="150" x2="150" y2="470" stroke="#E8E4DF" stroke-width="3"/>
+    <line x1="150" y1="470" x2="1080" y2="470" stroke="#E8E4DF" stroke-width="3"/>
+
+    <rect x="250" y="356" width="190" height="114" rx="16" fill="#FBBF24"/>
+    <rect x="505" y="272" width="190" height="198" rx="16" fill="#F5A623"/>
+    <rect x="760" y="188" width="190" height="282" rx="16" fill="#0099FF"/>
+
+    <text x="345" y="336" font-size="34" font-weight="700" fill="#1A1A2E" text-anchor="middle">20%</text>
+    <text x="600" y="252" font-size="34" font-weight="700" fill="#1A1A2E" text-anchor="middle">40%</text>
+    <text x="855" y="168" font-size="34" font-weight="700" fill="#1A1A2E" text-anchor="middle">50%</text>
+
+    <text x="345" y="516" font-size="26" font-weight="600" fill="#6B7280" text-anchor="middle">Day 30</text>
+    <text x="600" y="516" font-size="26" font-weight="600" fill="#6B7280" text-anchor="middle">Day 60</text>
+    <text x="855" y="516" font-size="26" font-weight="600" fill="#6B7280" text-anchor="middle">Day 90</text>
+
+    <path d="M345 356 L600 272 L855 188" fill="none" stroke="#1A1A2E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+  </g>
+</svg>

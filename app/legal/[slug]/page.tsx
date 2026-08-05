@@ -5,6 +5,7 @@ import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { ContentLayout } from '@/components/content/content-layout'
 import { getLegalPage, getAllLegalPages, extractToc } from '@/lib/content'
+import { MarkdownRenderer } from '@/components/content/markdown-renderer'
 import { generateMetadata as genMeta, webpageSchema, breadcrumbSchema, renderJsonLd } from '@/lib/seo'
 import { siteConfig } from '@/lib/seo-config'
 import Link from 'next/link'
@@ -27,23 +28,6 @@ export async function generateMetadata({
 
 export async function generateStaticParams() {
   return getAllLegalPages().map((p) => ({ slug: p.slug }))
-}
-
-function renderMarkdown(content: string): string {
-  return content
-    .replace(/^### (.+)$/gm, '<h3 id="$1">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 id="$1">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 id="$1">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/gs, '<ul>$&</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^/, '<p>')
-    .replace(/$/, '</p>')
-    .replace(/<p><h/g, '<h')
-    .replace(/<\/h(\d)><\/p>/g, '</h$1>')
-    .replace(/<p><ul>/g, '<ul>')
-    .replace(/<\/ul><\/p>/g, '</ul>')
 }
 
 export default async function LegalDetailPage({
@@ -132,10 +116,7 @@ export default async function LegalDetailPage({
                 </div>
               </header>
 
-              <div
-                className="prose prose-gray dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(page.content) }}
-              />
+              <MarkdownRenderer content={page.content} />
 
               <div className="mt-10 rounded-xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
                 <p>
