@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react'
+import Image from 'next/image'
 import { CodeBlock } from './code-block'
 import { slugify } from '@/lib/content'
 import { cn } from '@/lib/utils'
@@ -105,10 +106,12 @@ function Figure({
 
   return (
     <figure className={cn('my-8', widthClass, className)}>
-      <div className={cn('overflow-hidden rounded-2xl border border-border bg-muted shadow-sm', ratio)}>
-        <img
+      <div className={cn('relative overflow-hidden rounded-2xl border border-border bg-muted shadow-sm', ratio)}>
+        <Image
           src={src}
           alt={alt || caption || ''}
+          fill
+          sizes="(min-width: 768px) 832px, 100vw"
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
         />

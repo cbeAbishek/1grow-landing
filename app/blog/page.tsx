@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Clock, Tag, ArrowRight, BookOpen, ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
@@ -124,11 +125,13 @@ export default function BlogPage({
             >
               {paginatedPosts[0].featuredImage && (
                 <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-muted sm:w-80 xl:w-96">
-                  <img
+                  <Image
                     src={paginatedPosts[0].featuredImage}
                     alt={paginatedPosts[0].title}
+                    fill
+                    sizes="(min-width: 1280px) 384px, (min-width: 640px) 320px, 100vw"
+                    priority
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    loading="eager"
                   />
                 </div>
               )}
@@ -167,11 +170,13 @@ export default function BlogPage({
               >
                 {post.featuredImage && (
                   <div className="relative aspect-square w-full overflow-hidden bg-muted">
-                    <img
+                    <Image
                       src={post.featuredImage}
                       alt={post.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
                       loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
                 )}

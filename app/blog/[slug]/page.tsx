@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { Clock, Tag, Calendar, ChevronLeft, BookOpen, CheckCircle } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
@@ -7,9 +8,12 @@ import { SocialShare } from '@/components/content/social-share'
 import { NewsletterCta } from '@/components/content/newsletter-cta'
 import { RelatedPosts } from '@/components/content/related-posts'
 import { MarkdownRenderer } from '@/components/content/markdown-renderer'
-import { getBlogPost, getAllBlogPosts, extractToc } from '@/lib/content'
+import { getBlogPost, getAllBlogPosts, extractToc, getBlogPostImages } from '@/lib/content'
 import { generateMetadata as genMeta, articleSchema, breadcrumbSchema, webpageSchema, renderJsonLd } from '@/lib/seo'
 import { siteConfig } from '@/lib/seo-config'
+
+const FEATURED_IMAGE_WIDTH = 1254
+const FEATURED_IMAGE_HEIGHT = 1254
 
 export async function generateMetadata({
   params,
@@ -25,6 +29,9 @@ export async function generateMetadata({
     description: post.description,
     url: `${siteConfig.url}/blog/${post.slug}`,
     image: post.featuredImage,
+    imageAlt: post.title,
+    imageWidth: FEATURED_IMAGE_WIDTH,
+    imageHeight: FEATURED_IMAGE_HEIGHT,
     type: 'article',
     publishedAt: post.publishedAt,
     updatedAt: post.updatedAt,
@@ -80,6 +87,10 @@ export default async function BlogPostPage({
       authorUrl: `${siteConfig.url}/about`,
       url: postUrl,
       image: post.featuredImage,
+      imageAlt: post.title,
+      imageWidth: FEATURED_IMAGE_WIDTH,
+      imageHeight: FEATURED_IMAGE_HEIGHT,
+      images: getBlogPostImages(post),
       wordCount: post.content.replace(/[#*`>\[\]!_~]/g, '').split(/\s+/).length,
       articleBody: post.content,
     }),
@@ -109,12 +120,15 @@ export default async function BlogPostPage({
             <header className="mb-10">
               {post.featuredImage && (
                 <div className="mx-auto mb-8 w-full max-w-xl overflow-hidden rounded-2xl border border-border shadow-sm">
-                  <div className="aspect-square w-full overflow-hidden bg-muted">
-                    <img
+                  <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                    <Image
                       src={post.featuredImage}
                       alt={post.title}
+                      width={FEATURED_IMAGE_WIDTH}
+                      height={FEATURED_IMAGE_HEIGHT}
+                      sizes="(min-width: 768px) 576px, 100vw"
+                      priority
                       className="h-full w-full object-cover"
-                      loading="eager"
                     />
                   </div>
                 </div>

@@ -30,6 +30,27 @@ function extractToc(content: string): TocItem[] {
   })
 }
 
+const IMAGE_RE = /!\[([^\]]*)\]\(([^)\s]+)(?:\s+["']([^"']*)["'])?\)/g
+
+export function extractImages(content: string): { src: string; alt: string; title?: string }[] {
+  const images: { src: string; alt: string; title?: string }[] = []
+  const matches = content.matchAll(IMAGE_RE)
+  for (const match of matches) {
+    images.push({ src: match[2], alt: match[1] || match[3] || '', title: match[3] })
+  }
+  return images
+}
+
+export function getBlogPostImages(post: { featuredImage?: string; content: string }): string[] {
+  const urls: string[] = []
+  const add = (url?: string) => {
+    if (url && !urls.includes(url)) urls.push(url)
+  }
+  add(post.featuredImage)
+  for (const img of extractImages(post.content)) add(img.src)
+  return urls
+}
+
 function estimateReadingTime(content: string): number {
   const words = content.replace(/[#*`>\[\]!_~]/g, '').split(/\s+/).length
   return Math.max(1, Math.ceil(words / 200))

@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { getAllBlogPosts, getAllTutorials, getAllLegalPages } from '@/lib/content'
+import { getAllBlogPosts, getAllTutorials, getAllLegalPages, getBlogPostImages } from '@/lib/content'
 import { siteConfig } from '@/lib/seo-config'
 import { features } from '@/data/features'
 
@@ -32,6 +32,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(post.updatedAt ?? post.publishedAt),
     changeFrequency: 'monthly' as const,
     priority: 0.6,
+    images: getBlogPostImages(post).map((src) =>
+      src.startsWith('http') ? src : `${base}${src}`,
+    ),
   }))
 
   const tutorialPages = getAllTutorials().map((tutorial) => ({

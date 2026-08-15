@@ -7,6 +7,8 @@ export interface SeoMetadata {
   url: string
   image?: string
   imageAlt?: string
+  imageWidth?: number
+  imageHeight?: number
   type?: 'website' | 'article'
   publishedAt?: string
   updatedAt?: string
@@ -20,6 +22,8 @@ export function generateMetadata(seo: SeoMetadata): Metadata {
   const description = seo.description
   const image = seo.image ?? siteConfig.openGraph.image
   const imageAlt = seo.imageAlt ?? siteConfig.openGraph.imageAlt
+  const imageWidth = seo.imageWidth ?? siteConfig.openGraph.imageWidth
+  const imageHeight = seo.imageHeight ?? siteConfig.openGraph.imageHeight
 
   return {
     title,
@@ -39,8 +43,8 @@ export function generateMetadata(seo: SeoMetadata): Metadata {
         ? [
             {
               url: image.startsWith('http') ? image : `${siteConfig.url}${image}`,
-              width: siteConfig.openGraph.imageWidth,
-              height: siteConfig.openGraph.imageHeight,
+              width: imageWidth,
+              height: imageHeight,
               alt: imageAlt,
             },
           ]
@@ -63,6 +67,21 @@ export function generateMetadata(seo: SeoMetadata): Metadata {
           ]
         : [],
     },
+  }
+}
+
+export function imageObjectSchema(
+  url: string,
+  opts: { alt?: string; width?: number; height?: number; caption?: string } = {},
+) {
+  const absoluteUrl = url.startsWith('http') ? url : `${siteConfig.url}${url}`
+  return {
+    '@type': 'ImageObject',
+    url: absoluteUrl,
+    ...(opts.alt && { name: opts.alt }),
+    ...(opts.width && { width: opts.width }),
+    ...(opts.height && { height: opts.height }),
+    ...(opts.caption && { caption: opts.caption }),
   }
 }
 
@@ -185,9 +204,25 @@ export function articleSchema(post: {
   authorUrl?: string
   url: string
   image?: string
+  imageAlt?: string
+  imageWidth?: number
+  imageHeight?: number
+  images?: string[]
   wordCount?: number
   articleBody?: string
 }) {
+  const featuredImage = post.image
+    ? imageObjectSchema(post.image, {
+        alt: post.imageAlt ?? post.title,
+        width: post.imageWidth,
+        height: post.imageHeight,
+      })
+    : undefined
+
+  const contentImages = (post.images ?? [])
+    .filter((src) => src !== post.image)
+    .map((src) => imageObjectSchema(src))
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -207,12 +242,7 @@ export function articleSchema(post: {
       '@id': `${siteConfig.url}/#organization`,
       name: siteConfig.company.name,
     },
-    image: post.image
-      ? {
-          '@type': 'ImageObject',
-          url: post.image.startsWith('http') ? post.image : `${siteConfig.url}${post.image}`,
-        }
-      : undefined,
+    image: [featuredImage, ...contentImages].filter(Boolean),
     wordCount: post.wordCount ?? post.description.split(/\s+/).length,
     articleBody: post.articleBody ?? post.description,
     inLanguage: siteConfig.locale,

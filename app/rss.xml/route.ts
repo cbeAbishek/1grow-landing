@@ -14,12 +14,13 @@ export default function rss() {
       <guid isPermaLink="true">${baseUrl}/blog/${post.slug}</guid>
       <pubDate>${new Date(post.publishedAt).toUTCString()}</pubDate>
       <category>${post.category}</category>
+      ${post.featuredImage ? `<media:content url="${baseUrl}${post.featuredImage}" medium="image" type="image/jpeg"/>` : ''}
     </item>`,
     )
     .join('')
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>1Grow Blog</title>
     <description>Industry insights and product updates for training academies, rental businesses, and event companies.</description>
