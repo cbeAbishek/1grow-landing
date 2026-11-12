@@ -19,7 +19,7 @@ type Side = "right" | "left" | "center";
 
 const STAGING: { stage: string; side: Side }[] = [
   { stage: "Capture", side: "center" },
-  { stage: "Run", side: "left" },
+  { stage: "Run", side: "center" },
   { stage: "Grow", side: "center" },
 ];
 
@@ -147,20 +147,23 @@ interface AgentCardProps {
 function AgentCard({ plan, index }: AgentCardProps) {
   const { stage, side } =
     STAGING[index] ?? STAGING[STAGING.length - 1];
+  // Centre card (Business): presenter stands at the top centre.
   // Third card (Scale): the businessman stands at the bottom of the card.
+  const hasTopPersona = plan.id === "business";
   const hasBottomPersona = plan.id === "complete";
+  const hasAnimatedPersona = hasTopPersona || hasBottomPersona;
   const [isHovered, setIsHovered] = useState(false);
   const [animKey, setAnimKey] = useState(0);
 
   const handleMouseEnter = () => {
-    if (!hasBottomPersona) return;
+    if (!hasAnimatedPersona) return;
     setIsHovered(true);
     // Remount the GIF so its cycle restarts from the first frame.
     setAnimKey((prev) => prev + 1);
   };
 
   const handleMouseLeave = () => {
-    if (!hasBottomPersona) return;
+    if (!hasAnimatedPersona) return;
     setIsHovered(false);
   };
 
@@ -193,10 +196,45 @@ function AgentCard({ plan, index }: AgentCardProps) {
           )}
         >
           <div className="flex h-full w-full items-end justify-center">
-            <PersonaAvatar
-              planId={plan.id}
-              className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
-            />
+            {hasTopPersona ? (
+              <motion.div
+                animate={{
+                  scale: isHovered ? 1.04 : 1,
+                  y: isHovered ? -4 : 0,
+                }}
+                transition={{ type: "spring", stiffness: 240, damping: 20 }}
+                className="relative h-full w-full"
+              >
+                {/* Idle pose */}
+                <img
+                  src="/assert/business-agent-still.png"
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  className={cn(
+                    "pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-bottom drop-shadow-xl transition-opacity duration-300 ease-out [mask-image:linear-gradient(to_bottom,black_72%,transparent)]",
+                    isHovered ? "opacity-0" : "opacity-100"
+                  )}
+                />
+                {/* Presenting animation */}
+                <img
+                  key={animKey}
+                  src="/assert/business-agent.gif"
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  className={cn(
+                    "pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-bottom drop-shadow-xl transition-opacity duration-300 ease-out [mask-image:linear-gradient(to_bottom,black_72%,transparent)]",
+                    isHovered ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </motion.div>
+            ) : (
+              <PersonaAvatar
+                planId={plan.id}
+                className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
+              />
+            )}
           </div>
         </div>
       )}
