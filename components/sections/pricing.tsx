@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Check, Zap } from "lucide-react";
@@ -146,46 +147,69 @@ interface AgentCardProps {
 function AgentCard({ plan, index }: AgentCardProps) {
   const { stage, side } =
     STAGING[index] ?? STAGING[STAGING.length - 1];
+  // Third card (Scale): the businessman stands at the bottom of the card.
+  const hasBottomPersona = plan.id === "complete";
+  const [isHovered, setIsHovered] = useState(false);
+  const [animKey, setAnimKey] = useState(0);
+
+  const handleMouseEnter = () => {
+    if (!hasBottomPersona) return;
+    setIsHovered(true);
+    // Remount the GIF so its cycle restarts from the first frame.
+    setAnimKey((prev) => prev + 1);
+  };
+
+  const handleMouseLeave = () => {
+    if (!hasBottomPersona) return;
+    setIsHovered(false);
+  };
 
   return (
-    <Reveal
-      delay={index * 0.1}
-      className={cn(
-        "relative flex min-w-0 flex-1 flex-col rounded-[28px] border bg-card",
-        plan.highlight
-          ? "z-10 border-primary/50 shadow-2xl shadow-primary/15 ring-1 ring-primary/30 lg:-translate-y-3"
-          : "border-border shadow-lg shadow-black/[0.04]"
-      )}
-    >
+    <Reveal delay={index * 0.1} className="flex min-w-0 flex-1">
+      <motion.div
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={cn(
+          "relative flex min-w-0 w-full flex-1 flex-col rounded-[28px] border bg-card",
+          plan.highlight
+            ? "z-10 border-primary/50 shadow-2xl shadow-primary/15 ring-1 ring-primary/30 lg:-translate-y-3"
+            : "border-border shadow-lg shadow-black/[0.04]"
+        )}
+      >
       {/*
         Persona: stands mostly OUTSIDE the card, overlapping the top edge.
         Each card stages it differently: right, left, or centered.
         About 70% of the figure is above the card; the lower part fades in.
         Mobile: -top-36 h-52 | sm and up: -top-[10.5rem] h-60
       */}
-      <div
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute -top-36 z-20 flex h-52 items-end sm:-top-[10.5rem] sm:h-60",
-          side === "right" && "right-2 w-[48%] justify-end sm:right-3",
-          side === "left" && "left-2 w-[48%] justify-start sm:left-3",
-          side === "center" && "left-1/2 w-[62%] -translate-x-1/2 justify-center"
-        )}
-      >
-        <div className="flex h-full w-full items-end justify-center">
-          <PersonaAvatar
-            planId={plan.id}
-            className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
-          />
+      {!hasBottomPersona && (
+        <div
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute -top-36 z-20 flex h-52 items-end sm:-top-[10.5rem] sm:h-60",
+            side === "right" && "right-2 w-[48%] justify-end sm:right-3",
+            side === "left" && "left-2 w-[48%] justify-start sm:left-3",
+            side === "center" && "left-1/2 w-[62%] -translate-x-1/2 justify-center"
+          )}
+        >
+          <div className="flex h-full w-full items-end justify-center">
+            <PersonaAvatar
+              planId={plan.id}
+              className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         {/* Header: always clear of the persona */}
         <div
           className={cn(
             side === "center"
-              ? "flex flex-col items-center pt-14 text-center sm:pt-16"
+              ? cn(
+                  "flex flex-col items-center text-center",
+                  hasBottomPersona ? "pt-2 sm:pt-3" : "pt-14 sm:pt-16"
+                )
               : "min-h-[6.5rem] w-[50%] sm:min-h-[7rem]",
             side === "left" && "ml-auto"
           )}
@@ -253,6 +277,61 @@ function AgentCard({ plan, index }: AgentCardProps) {
           </span>
         </div>
 
+        {/* Third card: businessman with crossed arms, standing at the bottom */}
+        {hasBottomPersona && (
+          <div className="mt-3 flex justify-center">
+            <div className="relative">
+              {/* Ambient glow behind the presenter */}
+              <div
+                aria-hidden="true"
+                className={cn(
+                  "pointer-events-none absolute -inset-8 -z-10 rounded-full bg-primary/15 blur-2xl transition-opacity duration-500",
+                  isHovered ? "opacity-100" : "opacity-30"
+                )}
+              />
+
+              <motion.div
+                animate={{
+                  scale: isHovered ? 1.05 : 1,
+                  y: isHovered ? -4 : 0,
+                }}
+                transition={{ type: "spring", stiffness: 240, damping: 20 }}
+                className="relative"
+              >
+                {/* Idle pose */}
+                <img
+                  src="/assert/businessman-crossing-arms-still.png"
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  className={cn(
+                    "pointer-events-none block h-28 w-auto select-none object-contain object-bottom drop-shadow-lg transition-opacity duration-300 ease-out sm:h-32",
+                    isHovered ? "opacity-0" : "opacity-100"
+                  )}
+                />
+                {/* Presenting animation */}
+                <img
+                  key={animKey}
+                  src="/assert/businessman-crossing-arms.gif"
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  className={cn(
+                    "pointer-events-none absolute inset-0 block h-28 w-auto select-none object-contain object-bottom drop-shadow-lg transition-opacity duration-300 ease-out sm:h-32",
+                    isHovered ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </motion.div>
+
+              {/* Contact shadow */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-1 left-1/2 h-2.5 w-16 -translate-x-1/2 rounded-full bg-black/15 blur-md dark:bg-black/30"
+              />
+            </div>
+          </div>
+        )}
+
         {/* CTA */}
         <div className="mt-5">
           <Link
@@ -275,6 +354,7 @@ function AgentCard({ plan, index }: AgentCardProps) {
           </p>
         </div>
       </div>
+      </motion.div>
     </Reveal>
   );
 }
