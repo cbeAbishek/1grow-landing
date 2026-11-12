@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { motion, useTransform, type MotionValue } from "framer-motion";
 import { personaFaces } from "@/data/persona-face";
 import { cn } from "@/lib/utils";
@@ -13,10 +14,10 @@ export interface PersonaAvatarProps {
 }
 
 /**
- * Raster persona with an articulated jaw built from stacked clip-path slices
- * of the SAME png. The jaw slice slides down with voice intensity while a
- * dark mouth cavity is revealed underneath it. Blinking + idle float are
- * independent treatments layered on top.
+ * Raster persona lip-sync WITHOUT splitting the image: one <img> carries the
+ * portrait; an SVG overlay draws a vocal-tract mouth (dark cavity with teeth
+ * and tongue) whose scaleY is driven by voice intensity, over the PNG's
+ * resting smile. Blink & float are independent overlays.
  */
 export function PersonaAvatar({
   planId,
@@ -26,13 +27,13 @@ export function PersonaAvatar({
   className,
 }: PersonaAvatarProps) {
   const face = personaFaces[planId] ?? personaFaces.solo;
-  const jawHeight = face.jawBottom - face.jawTop;
-  const maxDropPct = face.maxJawDrop * jawHeight * 100;
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const { mouth } = face;
+  const m = mouth;
 
-  // Jaw translation as a % of the full-height layer element
-  const jawY = useTransform(lipLevel, [0, 1], ["0%", `${maxDropPct.toFixed(2)}%`]);
+  const jaw = useTransform(lipLevel, [0, 0.12, 0.5, 1], [0.06, 0.16, 0.62, 1]);
+  const cavityOpacity = useTransform(jaw, [0.06, 0.25, 1], [0, 1, 1]);
 
-  // Floating: slow breathing idle, quicker talk bob while speaking
   const floatGesture =
     isSpeaking && !reduceMotion
       ? { y: [0, -4, 0, -3, 0], rotate: [0, -0.6, 0, 0.5, 0] }
@@ -42,9 +43,6 @@ export function PersonaAvatar({
       ? { duration: 1.15, repeat: Infinity, ease: "easeInOut" as const }
       : { duration: 4.2, repeat: Infinity, ease: "easeInOut" as const };
 
-  const blink = !reduceMotion
-    ? { scaleY: [0.06, 1, 0.06] }
-    : undefined;
   const blinkTransition = {
     duration: 0.16,
     times: [0, 0.5, 1],
@@ -53,6 +51,9 @@ export function PersonaAvatar({
     ease: "easeInOut" as const,
   };
 
+  // Mouth cavity geometry
+  const halfW = m.width / 2;
+
   return (
     <motion.div
       className={cn("relative", className)}
@@ -60,74 +61,83 @@ export function PersonaAvatar({
       animate={reduceMotion ? undefined : floatGesture}
       transition={floatTransition}
     >
-      {/* Mouth cavity — revealed as the jaw drops */}
-      <div
-        aria-hidden="true"
-        className="absolute z-0"
-        style={{
-          left: `${(face.faceCenterX - face.mouthWidth / 2) * 100}%`,
-          width: `${face.mouthWidth * 100}%`,
-          top: `${face.jawTop * 100}%`,
-          height: `${(jawHeight * face.maxJawDrop * 1.12 + 0.015) * 100}%`,
-          background: face.cavityColor,
-          borderRadius: "50% / 62%",
-          boxShadow: "inset 0 3px 8px rgba(0,0,0,0.55)",
-        }}
-      />
-
-      {/* Lower face + torso — stays fixed */}
-      <img
-        src={face.image}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain"
-        style={{ clipPath: `inset(${face.jawBottom * 100}% 0 0 0)` }}
-      />
-
-      {/* Jaw slice — slides down with voice intensity */}
-      <motion.div
-        className="pointer-events-none absolute inset-0 z-10 select-none"
-        style={{
-          clipPath: `inset(${face.jawTop * 100}% 0 ${(1 - face.jawBottom) * 100}% 0)`,
-          y: jawY,
-          willChange: "transform",
-        }}
-      >
-        <img
-          src={face.image}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="absolute inset-0 h-full w-full object-contain"
-        />
-      </motion.div>
-
-      {/* Upper face — stays fixed; carries the accessible name */}
+      {/* The portrait itself — never sliced, never broken */}
       <img
         src={face.image}
         alt={face.alt}
         draggable={false}
-        className="pointer-events-none absolute inset-0 z-20 h-full w-full select-none object-contain"
-        style={{ clipPath: `inset(0 0 ${(1 - face.jawTop) * 100}% 0)` }}
+        className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain drop-shadow-xl"
       />
 
-      {/* Blink lids */}
-      {[face.eyeCx[0], face.eyeCx[1]].map((cx) => (
-        <motion.div
-          key={cx}
-          aria-hidden="true"
-          className="absolute z-30 origin-top rounded-[50%]"
+      {/* Voice action ON the image: articulated overlay mouth */}
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-10 h-full w-full"
+      >
+        <defs>
+          <radialGradient id={`cavity-${uid}`} cx="50%" cy="42%" r="65%">
+            <stop offset="0%" stopColor="#120609" />
+            <stop offset="70%" stopColor="#1f0e0c" />
+            <stop offset="100%" stopColor="#33201c" />
+          </radialGradient>
+        </defs>
+
+        {/* Resting state = the PNG's own smile; opening mouth draws over it */}
+
+        {/* Open mouth: cavity + teeth + tongue, jaw-opens from its top edge */}
+        <motion.g
           style={{
-            left: `${(cx - face.eyeWidth / 2) * 100}%`,
+            scaleY: jaw,
+            opacity: cavityOpacity,
+            transformBox: "fill-box",
+            originX: "50%",
+            originY: "8%",
+          }}
+        >
+          <ellipse
+            cx={m.cx * 100}
+            cy={m.cy * 100}
+            rx={halfW * 88}
+            ry={(m.openHeight / 2) * 100}
+            fill={`url(#cavity-${uid})`}
+          />
+          {/* Upper teeth */}
+          <path
+            d={`M ${(m.cx - halfW * 0.72) * 100} ${(m.cy - m.openHeight * 0.36) * 100}
+               Q ${m.cx * 100} ${(m.cy - m.openHeight * 0.1) * 100} ${(m.cx + halfW * 0.72) * 100} ${(m.cy - m.openHeight * 0.36) * 100}
+               L ${(m.cx + halfW * 0.62) * 100} ${(m.cy - m.openHeight * 0.18) * 100}
+               Q ${m.cx * 100} ${(m.cy + m.openHeight * 0.06) * 100} ${(m.cx - halfW * 0.62) * 100} ${(m.cy - m.openHeight * 0.18) * 100} Z`}
+            fill="#f7f5ef"
+          />
+          {/* Tongue */}
+          <ellipse
+            cx={m.cx * 100}
+            cy={(m.cy + m.openHeight * 0.24) * 100}
+            rx={halfW * 52}
+            ry={m.openHeight * 36}
+            fill="#b0504a"
+          />
+        </motion.g>
+      </svg>
+
+      {/* Blink lids */}
+      {[face.eyeL, face.eyeR].map((eye, i) => (
+        <motion.div
+          key={i}
+          aria-hidden="true"
+          className="pointer-events-none absolute z-20 origin-top"
+          style={{
+            left: `${(eye.cx - eye.w / 2) * 100}%`,
             top: `${face.eyeTop * 100}%`,
-            width: `${face.eyeWidth * 100}%`,
+            width: `${eye.w * 100}%`,
             height: `${face.eyeHeight * 100}%`,
             background: face.lidColor,
             borderRadius: "48% 48% 52% 52% / 42% 42% 58% 58%",
             boxShadow: "0 1.5px 2px rgba(0,0,0,0.35)",
           }}
-          animate={reduceMotion ? undefined : blink}
+          animate={reduceMotion ? undefined : { scaleY: [0.06, 1, 0.06] }}
           transition={blinkTransition}
         />
       ))}
