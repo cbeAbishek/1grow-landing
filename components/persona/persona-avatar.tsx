@@ -25,7 +25,7 @@ export function PersonaAvatar({
     duration: 0.16,
     times: [0, 0.5, 1],
     repeat: Infinity,
-    repeatDelay: 3.4 + (planId === "business" ? 1.2 : planId === "complete" ? 2.4 : 0),
+    repeatDelay: 3.4,
     ease: "easeInOut" as const,
   };
 

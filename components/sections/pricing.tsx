@@ -1,24 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useReducedMotion } from "framer-motion";
-import {
-  ArrowRight,
-  Sparkles,
-  Check,
-} from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowDown, ArrowRight, Check, Zap } from "lucide-react";
 import { PersonaAvatar } from "@/components/persona/persona-avatar";
 import { SectionHeading } from "@/components/section-heading";
 import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
-import {
-  billingOptions,
-  personaPlans,
-  calculateEffectiveMonthlyPrice,
-  type BillingPeriod,
-  type PricingPersona,
-} from "@/data/pricing";
+import { personaPlans, type PricingPersona } from "@/data/pricing";
+
+/* -------------------------------------------------------------------------- */
+/*  Per-card staging: where the persona stands and which gesture it performs.  */
+/*  Order follows `personaPlans`.                                              */
+/*    blink : calm, only the eye blink built into PersonaAvatar                */
+/*    point : leans toward the feature card and a pointer shows the way down   */
+/*    nod   : greets the visitor with two small nods                           */
+/* -------------------------------------------------------------------------- */
+
+type Side = "right" | "left" | "center";
+type Gesture = "blink" | "point" | "nod";
+
+const STAGING: { stage: string; side: Side; gesture: Gesture }[] = [
+  { stage: "Capture", side: "right", gesture: "blink" },
+  { stage: "Run", side: "left", gesture: "point" },
+  { stage: "Grow", side: "center", gesture: "nod" },
+];
 
 interface PricingProps {
   showHeading?: boolean;
@@ -31,129 +37,63 @@ export function Pricing({
   className,
   id = "pricing",
 }: PricingProps) {
-  const [billing, setBilling] = useState<BillingPeriod>("annual");
+  const plans = personaPlans;
 
   return (
     <section
       id={id}
       aria-labelledby="pricing-heading"
-      className={cn("scroll-mt-24 px-4 py-20 sm:py-24", className)}
+      className={cn(
+        "relative isolate scroll-mt-24 overflow-hidden px-4 py-20 sm:py-28",
+        className
+      )}
     >
+      {/* Soft blueprint grid and warm spotlight */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 text-foreground opacity-[0.045] [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_45%,black,transparent)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/3 -z-10 h-[32rem] w-[60rem] max-w-full -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
+      />
+
       <div className="mx-auto max-w-7xl">
         {showHeading && (
           <SectionHeading
-            eyebrow="Persona-Based Pricing"
+            eyebrow="Your agent team"
             title={
               <>
-                Meet the founders{" "}
-                <span className="text-gradient">scaling on 1Grow</span>
+                Pick how many agents{" "}
+                <span className="text-gradient">work for your business</span>
               </>
             }
-            description="Real business owners sharing genuine business outcomes at your operational stage. No static module checklists—just results."
+            description="Each plan adds an agent to the relay. They hand work to each other, so you run the business while they run the routine."
             accentColor="primary"
           />
         )}
 
-        {/* 20-Day Free Trial Launch Banner */}
-        <Reveal className="mx-auto mt-10 max-w-4xl">
-          <div className="relative overflow-hidden rounded-2xl border border-accent-green/25 bg-gradient-to-r from-accent-green/10 via-card to-accent-green/5 p-5 shadow-sm sm:flex sm:items-center sm:justify-between sm:p-6">
-            <div className="flex items-start gap-4">
-              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-green/20 text-accent-green shadow-sm">
-                <Sparkles className="size-6" aria-hidden="true" />
-              </span>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-heading text-base font-bold text-foreground sm:text-lg">
-                    Full Platform Access · 20-Day Free Trial
-                  </p>
-                  <span className="inline-flex items-center rounded-full bg-accent-green/20 px-2.5 py-0.5 text-xs font-semibold text-accent-green">
-                    No Credit Card Required
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                  Experience the exact operational turnaround before paying a single rupee. All features unlocked.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 shrink-0 sm:mt-0 sm:pl-4">
-              <Link
-                href="/wishlist"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-green px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-accent-green/20 transition-all hover:bg-accent-green/90 sm:w-auto"
-              >
-                Claim Free Trial
-                <ArrowRight className="size-4" />
-              </Link>
-            </div>
-          </div>
+        {/* Trigger node: the trial starts the workflow */}
+        <Reveal className="mx-auto mt-12 max-w-3xl">
+          <TrialTrigger />
         </Reveal>
+        <div
+          aria-hidden="true"
+          className="mx-auto h-10 w-px bg-gradient-to-b from-border via-primary/40 to-border lg:hidden"
+        />
 
-        {/* Billing frequency toggle */}
-        <div className="mt-10 flex flex-col items-center justify-center gap-4">
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {/* Billing Periods */}
-            <div
-              role="tablist"
-              aria-label="Billing frequency selection"
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/80 p-1.5 shadow-inner backdrop-blur-sm"
-            >
-              {billingOptions.map((option) => {
-                const isSelected = billing === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    role="tab"
-                    aria-selected={isSelected}
-                    onClick={() => setBilling(option.id)}
-                    className={cn(
-                      "relative flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:text-sm",
-                      isSelected
-                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <span>{option.label}</span>
-                    {option.badge && (
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
-                          isSelected
-                            ? "bg-primary-foreground/20 text-primary-foreground"
-                            : "bg-accent-green/15 text-accent-green"
-                        )}
-                      >
-                        {option.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+        {/* The relay. pt-44 is the headroom the personas rise into. */}
+        <div className="flex flex-col items-stretch pt-44 lg:flex-row lg:pt-48">
+          {plans.map((plan, i) => (
+            <div key={plan.id} className="contents">
+              <AgentCard plan={plan} index={i} />
+              {i < plans.length - 1 && (
+                <Handoff
+                  fromName={plan.characterName}
+                  toName={plans[i + 1].characterName}
+                />
+              )}
             </div>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            {billing === "annual" ? (
-              <span className="font-medium text-accent-green">
-                ✓ 20% Annual savings applied — enjoy 2 months free!
-              </span>
-            ) : billing === "half" ? (
-              <span className="font-medium text-accent-green">
-                ✓ 10% Semi-annual savings applied
-              </span>
-            ) : (
-              "Standard monthly billing, cancel anytime with 1 click."
-            )}
-          </p>
-        </div>
-
-        {/* Minimal Persona Pricing Cards Grid (ONLY Character, Plan Name, Price, CTA) */}
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch">
-          {personaPlans.map((plan, i) => (
-            <PersonaCard
-              key={plan.id}
-              plan={plan}
-              billing={billing}
-              index={i}
-            />
           ))}
         </div>
       </div>
@@ -161,138 +101,316 @@ export function Pricing({
   );
 }
 
-interface PersonaCardProps {
+/* -------------------------------------------------------------------------- */
+/*  Trial trigger                                                              */
+/* -------------------------------------------------------------------------- */
+
+function TrialTrigger() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-accent-green/30 bg-card/80 p-5 shadow-sm backdrop-blur sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6">
+      <div
+        aria-hidden="true"
+        className="absolute inset-y-0 left-0 w-1 bg-accent-green"
+      />
+      <div className="flex items-start gap-4">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-green/15 text-accent-green">
+          <Zap className="size-5" aria-hidden="true" />
+        </span>
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-heading text-base font-bold text-foreground sm:text-lg">
+              Start with all agents on, free for 20 days
+            </p>
+            <span className="rounded-full bg-accent-green/15 px-2.5 py-0.5 text-xs font-semibold text-accent-green">
+              No credit card
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+            See the full relay work on your own business before you pay a single
+            rupee.
+          </p>
+        </div>
+      </div>
+      <Link
+        href="/wishlist"
+        className="mt-4 inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-accent-green px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-accent-green/20 transition hover:bg-accent-green/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-green sm:mt-0 sm:w-auto"
+      >
+        Claim free trial
+        <ArrowRight className="size-4" aria-hidden="true" />
+      </Link>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Handoff rail between agents                                                */
+/* -------------------------------------------------------------------------- */
+
+function Handoff({
+  fromName,
+  toName,
+}: {
+  fromName: string;
+  toName: string;
+}) {
+  const reduceMotion = useReducedMotion();
+  const label = `${fromName} hands work to ${toName}`;
+
+  return (
+    <>
+      {/* Desktop: horizontal rail at header height */}
+      <div
+        role="img"
+        aria-label={label}
+        className="relative hidden w-14 shrink-0 self-start lg:mt-16 lg:block xl:w-20"
+      >
+        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        {!reduceMotion && (
+          <motion.span
+            className="absolute top-0 size-2.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_14px_3px] shadow-primary/50"
+            animate={{ left: ["0%", "100%"], opacity: [0, 1, 1, 0] }}
+            transition={{
+              duration: 2.4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              repeatDelay: 0.6,
+            }}
+          />
+        )}
+        <span className="absolute left-1/2 top-0 grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-sm">
+          <ArrowRight className="size-3.5" aria-hidden="true" />
+        </span>
+      </div>
+
+      {/* Mobile and tablet: vertical rail through the headroom */}
+      <div
+        role="img"
+        aria-label={label}
+        className="relative mx-auto h-44 w-px lg:hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-border via-primary/40 to-border" />
+        {!reduceMotion && (
+          <motion.span
+            className="absolute left-1/2 size-2.5 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_14px_3px] shadow-primary/50"
+            animate={{ top: ["0%", "100%"], opacity: [0, 1, 1, 0] }}
+            transition={{
+              duration: 2.2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              repeatDelay: 0.5,
+            }}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Persona gestures                                                           */
+/* -------------------------------------------------------------------------- */
+
+function gestureMotion(gesture: Gesture, side: Side) {
+  switch (gesture) {
+    case "point": {
+      // Lean toward the card below; direction follows the side it stands on.
+      const dir = side === "left" ? 1 : -1;
+      return {
+        animate: {
+          rotate: [0, 4 * dir, 4 * dir, 0],
+          x: [0, 6 * dir, 6 * dir, 0],
+          y: [0, 3, 3, 0],
+        },
+        transition: {
+          duration: 4,
+          times: [0, 0.2, 0.75, 1],
+          repeat: Infinity,
+          ease: "easeInOut" as const,
+        },
+      };
+    }
+    case "nod":
+      // Two small nods, then a pause.
+      return {
+        animate: { y: [0, 7, 0, 7, 0, 0] },
+        transition: {
+          duration: 3.6,
+          times: [0, 0.1, 0.2, 0.3, 0.4, 1],
+          repeat: Infinity,
+          ease: "easeInOut" as const,
+        },
+      };
+    default:
+      return { animate: undefined, transition: undefined };
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Agent card                                                                 */
+/* -------------------------------------------------------------------------- */
+
+interface AgentCardProps {
   plan: PricingPersona;
-  billing: BillingPeriod;
   index: number;
 }
 
-function PersonaCard({
-  plan,
-  billing,
-  index,
-}: PersonaCardProps) {
+function AgentCard({ plan, index }: AgentCardProps) {
   const reduceMotion = useReducedMotion();
-  const effectivePrice = calculateEffectiveMonthlyPrice(
-    plan.monthlyPrice,
-    billing
-  );
-  const hasDiscount = billing !== "monthly";
+  const { stage, side, gesture } =
+    STAGING[index] ?? STAGING[STAGING.length - 1];
+  const motionProps = gestureMotion(gesture, side);
 
   return (
     <Reveal
       delay={index * 0.1}
       className={cn(
-        "group relative flex h-full flex-col rounded-3xl border transition-all duration-300",
+        "relative flex min-w-0 flex-1 flex-col rounded-[28px] border bg-card",
         plan.highlight
-          ? "border-primary/50 bg-gradient-to-b from-primary/10 via-card to-card shadow-2xl shadow-primary/15 ring-2 ring-primary/25 lg:-translate-y-2 lg:scale-[1.03] z-10"
-          : "border-border bg-card hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-black/5"
+          ? "z-10 border-primary/50 shadow-2xl shadow-primary/15 ring-1 ring-primary/30 lg:-translate-y-3"
+          : "border-border shadow-lg shadow-black/[0.04]"
       )}
     >
-      {/* Popular Badge for Highlighted Middle Plan */}
-      {plan.highlight && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-primary to-accent-yellow px-4 py-1 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/30">
-            <Sparkles className="size-3.5 fill-current" />
-            {plan.popularBadge || "Most Popular"}
-          </span>
-        </div>
+      {/*
+        Persona: stands mostly OUTSIDE the card, overlapping the top edge.
+        Each card stages it differently: right, left, or centered.
+        About 70% of the figure is above the card; the lower part fades in.
+        Mobile: -top-36 h-52 | sm and up: -top-[10.5rem] h-60
+      */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute -top-36 z-20 flex h-52 items-end sm:-top-[10.5rem] sm:h-60",
+          side === "right" && "right-2 w-[48%] justify-end sm:right-3",
+          side === "left" && "left-2 w-[48%] justify-start sm:left-3",
+          side === "center" && "left-1/2 w-[62%] -translate-x-1/2 justify-center"
+        )}
+      >
+        <motion.div
+          className="flex h-full w-full items-end justify-center"
+          style={{
+            transformOrigin:
+              side === "left" ? "35% 100%" : side === "right" ? "65% 100%" : "50% 100%",
+          }}
+          animate={reduceMotion ? undefined : motionProps.animate}
+          transition={motionProps.transition}
+        >
+          {/* Only the "blink" card keeps the built-in eye blink, so every
+              card shows one clear gesture. */}
+          <PersonaAvatar
+            planId={plan.id}
+            reduceMotion={gesture === "blink" ? !!reduceMotion : true}
+            className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
+          />
+        </motion.div>
+      </div>
+
+      {/* Pointer that shows the way to the feature cards (point gesture only) */}
+      {gesture === "point" && (
+        <motion.span
+          aria-hidden="true"
+          className={cn(
+            "absolute top-[5.75rem] z-10 grid size-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 sm:top-[6.25rem]",
+            side === "left" ? "left-8 sm:left-9" : "right-8 sm:right-9"
+          )}
+          animate={reduceMotion ? undefined : { y: [0, 8, 0] }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <ArrowDown className="size-4" strokeWidth={3} />
+        </motion.span>
       )}
 
-      <div className="flex flex-1 flex-col p-6 sm:p-7">
-        {/* 1. Plan Name & Persona Header */}
-        <div className="text-center">
-          <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        {/* Header: always clear of the persona */}
+        <div
+          className={cn(
+            side === "center"
+              ? "flex flex-col items-center pt-14 text-center sm:pt-16"
+              : "min-h-[6.5rem] w-[50%] sm:min-h-[7rem]",
+            side === "left" && "ml-auto"
+          )}
+        >
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-foreground/80">
+            <span className="size-1.5 rounded-full bg-primary" />
+            {stage}
+          </span>
+          <h3 className="mt-2 font-heading text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
             {plan.planName}
           </h3>
-          <p className="mt-1 text-xs font-medium text-muted-foreground">
-            {plan.characterName} · {plan.characterRole}
+          <p className="mt-1 text-xs font-medium leading-snug text-muted-foreground">
+            {plan.characterName}
+            <span className="block">{plan.characterRole}</span>
           </p>
         </div>
 
-        {/* 2. The Persona — portrait with an eye-blink gesture */}
-        <div className="relative my-2 flex flex-col items-center justify-center">
-          <PersonaAvatar
-            planId={plan.id}
-            reduceMotion={!!reduceMotion}
-            className="relative z-10 h-44 w-auto drop-shadow-xl transition-all duration-300 group-hover:scale-[1.03] sm:h-48"
-          />
-        </div>
+        {/* Feature menu cards: fully visible and static */}
+        <div className="mt-4 flex-1">
+          <p className="mb-2 text-xs font-semibold text-foreground/80">
+            What you get
+          </p>
 
-        {/* 3. What's included in this package */}
-        <ul className="mt-2 flex-1 space-y-1.5 border-t border-border/60 pt-3">
-          {plan.features.map((feature) => {
-            const isDivider = feature.startsWith("Everything in");
-            if (isDivider) {
+          <ul className="space-y-1.5">
+            {plan.features.map((feature) => {
+              if (feature.startsWith("Everything in")) {
+                return (
+                  <li
+                    key={feature}
+                    className="flex items-center gap-2 pb-0.5 pt-1.5 text-xs font-semibold text-muted-foreground"
+                  >
+                    <span className="h-px flex-1 bg-border" />
+                    {feature}
+                    <span className="h-px flex-1 bg-border" />
+                  </li>
+                );
+              }
+
               return (
                 <li
                   key={feature}
-                  className="pt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground"
+                  className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-background/50 px-3 py-2 text-xs font-medium leading-snug text-foreground/85"
                 >
-                  {feature}
+                  <span className="mt-px grid size-4 shrink-0 place-items-center rounded-full bg-accent-green/15 text-accent-green">
+                    <Check
+                      className="size-2.5"
+                      strokeWidth={3.5}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span>{feature}</span>
                 </li>
               );
-            }
-            return (
-              <li
-                key={feature}
-                className="flex items-start gap-2 text-[11px] font-medium leading-snug text-foreground/90 sm:text-xs"
-              >
-                <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-accent-green/15 text-accent-green">
-                  <Check className="size-2.5" strokeWidth={3.5} aria-hidden="true" />
-                </span>
-                <span>{feature}</span>
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* 4. Price Display */}
-        <div className="border-t border-border/60 pt-4 text-center">
-          <div className="flex items-baseline justify-center gap-1.5">
-            <span className="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-              ₹{effectivePrice.toLocaleString("en-IN")}
-            </span>
-            <span className="text-sm font-semibold text-muted-foreground">
-              /month
-            </span>
-          </div>
-
-          <div className="mt-1 flex items-center justify-center gap-2">
-            {hasDiscount && (
-              <span className="text-xs text-muted-foreground line-through">
-                ₹{plan.monthlyPrice.toLocaleString("en-IN")}
-              </span>
-            )}
-            {hasDiscount && (
-              <span className="rounded-md bg-accent-green/15 px-2 py-0.5 text-[11px] font-bold text-accent-green">
-                Save {billing === "annual" ? "20%" : "10%"}
-              </span>
-            )}
-            {!hasDiscount && (
-              <span className="text-[11px] text-muted-foreground">
-                Billed monthly
-              </span>
-            )}
-          </div>
+            })}
+          </ul>
         </div>
 
-        {/* 5. CTA Button */}
+        {/* Price: original price only */}
+        <div className="mt-5 flex items-baseline justify-center gap-1.5 border-t border-border/60 pt-5">
+          <span className="font-heading text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
+            ₹{plan.monthlyPrice.toLocaleString("en-IN")}
+          </span>
+          <span className="text-sm font-semibold text-muted-foreground">
+            /month
+          </span>
+        </div>
+
+        {/* CTA */}
         <div className="mt-5">
           <Link
             href={plan.ctaHref}
             className={cn(
               "group/btn flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
               plan.highlight
-                ? "bg-gradient-to-r from-primary via-accent-yellow to-primary text-primary-foreground shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/35"
-                : "border-2 border-border bg-card text-foreground hover:border-primary hover:bg-muted/50 hover:text-foreground"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/35"
+                : "border-2 border-border bg-card text-foreground hover:border-primary hover:bg-muted/50"
             )}
           >
             <span>{plan.ctaText}</span>
-            <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
+            <ArrowRight
+              className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1"
+              aria-hidden="true"
+            />
           </Link>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            20-day full access · No card required
+            20-day full access, no card required
           </p>
         </div>
       </div>
