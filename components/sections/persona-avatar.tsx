@@ -190,7 +190,7 @@ export function PersonaAvatar({
           fill={`url(#blazer-${uid})`}
         />
         <path d="M110,156l-16,26 16,58 16,-58Z" fill="#f5e9d7" opacity={0.95} />
-        <path d="M84,166l24,20M136,166l-24,20" stroke="#0b3b39" strokeWidth={4} strokeLinecap="round" opacity={0.8} />
+        <path d="M85,164l23,20M135,164l-23,20" stroke="#0b3b39" strokeWidth={2.4} strokeLinecap="round" opacity={0.85} fill="none" />
         <path d="M92,192q18,12 36,0" stroke="#f0c56b" strokeWidth={2} fill="none" opacity={0.9} />
 
         {/* Neck */}
@@ -277,8 +277,8 @@ export function PersonaAvatar({
         <ellipse cx={101} cy={74} rx={16} ry={14} fill="#a9714b" opacity={0.28} />
 
         {/* Salt-and-pepper receding hair */}
-        <path d="M79,76C75,36 96,22 116,23C140,24 148,40 143,72L136,58C124,48 96,50 86,60Z" fill="#a8b0bd" />
-        <path d="M86,60C96,50 124,48 136,58L133,66C122,57 99,58 89,66Z" fill="#6b7280" opacity={0.7} />
+        <path d="M79,76C75,36 96,22 116,23C140,24 148,40 143,72L137,57C124,46 96,48 86,59Z" fill="#b6bdc9" />
+        <path d="M86,60C96,50 124,48 136,58L133,66.5C122,57.5 99,58.5 89,66.5Z" fill="#5b6470" opacity={0.8} />
 
         {/* Full salt-pepper beard */}
         <path
@@ -352,7 +352,7 @@ export function PersonaAvatar({
     >
       <defs>
         <radialGradient id={`bg-${uid}`} cx="50%" cy="45%" r="55%">
-          <stop offset="0%" stopColor={accent} stopOpacity="0.22" />
+          <stop offset="0%" stopColor={accent} stopOpacity="0.3" />
           <stop offset="100%" stopColor={accent} stopOpacity="0" />
         </radialGradient>
         <linearGradient id={`skinSolo-${uid}`} x1="0" y1="0" x2="0" y2="1">

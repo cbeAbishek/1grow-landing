@@ -542,7 +542,7 @@ function PersonaCard({
               }
               aria-pressed={isSpeaking}
               className={cn(
-                "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                "inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                 isSpeaking
                   ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90"
                   : "bg-card border border-border text-foreground hover:bg-muted hover:border-primary/30"
@@ -570,7 +570,7 @@ function PersonaCard({
                 className="text-primary"
               />
             ) : (
-              <span className="hidden items-center gap-1.5 pr-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:inline-flex">
+              <span className="hidden items-center gap-1.5 whitespace-nowrap pr-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground xl:inline-flex">
                 <Mic className="size-3.5" aria-hidden="true" />
                 Tap to hear
               </span>
