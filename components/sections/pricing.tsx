@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
 import { personaPlans, type PricingPersona } from "@/data/pricing";
+import { SoloAgentCard } from "@/components/sections/solo-agent-card";
 
 /* -------------------------------------------------------------------------- */
 /*  Per-card staging: where the persona stands. Order follows `personaPlans`. */
@@ -39,7 +40,7 @@ export function Pricing({
       id={id}
       aria-labelledby="pricing-heading"
       className={cn(
-        "relative isolate scroll-mt-24 overflow-hidden px-4 py-20 sm:py-28",
+        "relative isolate scroll-mt-24 overflow-hidden px-4 sm:px-6 lg:px-8 xl:px-10 py-20 sm:py-28",
         className
       )}
     >
@@ -78,10 +79,14 @@ export function Pricing({
         />
 
         {/* The relay. pt-44 is the headroom the personas rise into. */}
-        <div className="flex flex-col gap-40 pt-44 sm:gap-44 lg:flex-row lg:gap-6 lg:pt-48">
-          {plans.map((plan, i) => (
-            <AgentCard key={plan.id} plan={plan} index={i} />
-          ))}
+        <div className="flex flex-col gap-40 pt-44 sm:gap-44 lg:flex-row lg:gap-6 lg:pt-48 lg:pl-10 xl:pl-12">
+          {plans.map((plan, i) =>
+            plan.id === "solo" ? (
+              <SoloAgentCard key={plan.id} plan={plan} index={i} />
+            ) : (
+              <AgentCard key={plan.id} plan={plan} index={i} />
+            )
+          )}
         </div>
       </div>
     </section>
@@ -168,29 +173,10 @@ function AgentCard({ plan, index }: AgentCardProps) {
         )}
       >
         <div className="flex h-full w-full items-end justify-center">
-          {plan.id === "solo" ? (
-            <motion.div
-              initial={{ y: 0, scale: 1 }}
-              animate={{ y: 0, scale: 1 }}
-              whileHover={{ y: -14, scale: 1.06 }}
-              transition={{ type: "spring", stiffness: 220, damping: 18 }}
-              style={{ aspectRatio: "431 / 405", height: "100%" }}
-              className="relative pointer-events-auto w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
-            >
-              <img
-                src="/assert/Animated1.gif"
-                alt=""
-                aria-hidden="true"
-                draggable={false}
-                className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-bottom"
-              />
-            </motion.div>
-          ) : (
-            <PersonaAvatar
-              planId={plan.id}
-              className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
-            />
-          )}
+          <PersonaAvatar
+            planId={plan.id}
+            className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
+          />
         </div>
       </div>
 
