@@ -1,279 +1,378 @@
 "use client";
 
-import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Check,
+  Sparkles,
+  Quote,
+  TrendingUp,
+  UserCheck,
+  ShieldCheck,
+} from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
+import {
+  billingOptions,
+  personaPlans,
+  calculateEffectiveMonthlyPrice,
+  type BillingPeriod,
+  type PricingPersona,
+} from "@/data/pricing";
 
-type Billing = "monthly" | "half" | "annual";
-
-const billingOptions: { id: Billing; label: string; note?: string }[] = [
-  { id: "monthly", label: "Monthly" },
-  { id: "half", label: "6 Months", note: "Save 10%" },
-  { id: "annual", label: "12 Months", note: "Save 20%" },
-];
-
-const discount: Record<Billing, number> = {
-  monthly: 1,
-  half: 0.9,
-  annual: 0.8,
-};
-
-const plans = [
-  {
-    name: "Solo Module",
-    subtitle: "Choose Any One Module",
-    price: 999,
-    description: "Training Management, Rental Management, or Event Management.",
-    features: [
-      "Lead Management",
-      "Customer Management",
-      "Payment Tracking",
-      "Notifications",
-      "Dashboard",
-      "Reports",
-      "Export (PDF, Excel, CSV)",
-    ],
-    limits: ["Staff Users: 5", "Branches: 1", "Storage: 5 GB", "Records: 500"],
-    highlight: false,
-    color: "border-primary/20",
-  },
-  {
-    name: "Business Plan",
-    subtitle: "Choose Any Two Modules",
-    price: 1899,
-    description:
-      "Everything in Solo, plus advanced features for growing teams.",
-    features: [
-      "Multi Branch Support",
-      "Team Management",
-      "Role Management",
-      "Approval Workflows",
-      "Customer Portal",
-      "Student Portal",
-      "Advanced Reports",
-      "WhatsApp Automation",
-    ],
-    limits: [
-      "Staff Users: 15",
-      "Branches: 3",
-      "Storage: 25 GB",
-      "Records: 5,000",
-    ],
-    highlight: true,
-    color: "border-primary/30",
-  },
-  {
-    name: "Complete Plan",
-    subtitle: "Includes All Modules",
-    price: 2499,
-    description:
-      "All modules with premium features, AI, and unlimited records.",
-    features: [
-      "All module features included",
-      "AI Insights",
-      "Smart Follow-ups",
-      "Revenue Forecasting",
-      "Advanced Analytics",
-      "Customer / Student / Client Portals",
-      "Workflow Automation",
-      "Priority Support",
-    ],
-    limits: [
-      "Staff Users: 50",
-      "Branches: 10",
-      "Storage: 100 GB",
-      "Records: Unlimited",
-    ],
-    highlight: false,
-    color: "border-accent-blue/20",
-  },
-  {
-    name: "Enterprise",
-    subtitle: "Custom Quotation",
-    price: 0,
-    description:
-      "For franchise academies, multi-city businesses, and large chains.",
-    features: [
-      "Unlimited Users & Branches",
-      "White Label Solution",
-      "Custom Domain",
-      "API Access",
-      "ERP Integrations",
-      "Dedicated Account Manager",
-      "SLA Support",
-      "Single Sign-On (SSO)",
-      "Audit Logs",
-      "Custom Workflows",
-    ],
-    limits: [],
-    highlight: false,
-    isEnterprise: true,
-    color: "border-accent-cyan/20",
-  },
-];
-
-function formatPrice(base: number, billing: Billing) {
-  return Math.round(base * discount[billing]).toLocaleString("en-IN");
+interface PricingProps {
+  showHeading?: boolean;
+  className?: string;
+  id?: string;
 }
 
-export function Pricing() {
-  const [billing, setBilling] = useState<Billing>("annual");
+export function Pricing({
+  showHeading = true,
+  className,
+  id = "pricing",
+}: PricingProps) {
+  const [billing, setBilling] = useState<BillingPeriod>("annual");
 
   return (
-    <section id="pricing" className="scroll-mt-24 px-4 py-24">
-      <div className="mx-auto max-w-6xl">
-        <SectionHeading
-          eyebrow="Pricing"
-          title="Simple, transparent pricing"
-          description="Start with a 20-day free trial - full access, all modules, no credit card required."
-        />
+    <section
+      id={id}
+      aria-labelledby="pricing-heading"
+      className={cn("scroll-mt-24 px-4 py-20 sm:py-24", className)}
+    >
+      <div className="mx-auto max-w-7xl">
+        {showHeading && (
+          <SectionHeading
+            eyebrow="Persona-Based Pricing"
+            title={
+              <>
+                Plans built for how you{" "}
+                <span className="text-gradient">actually run</span> your business
+              </>
+            }
+            description="No confusing module checklists or per-feature paywalls. Hear directly from founders at your stage, choose the outcome you need, and scale without friction."
+            accentColor="primary"
+          />
+        )}
 
-        {/* Free trial banner */}
-        <Reveal className="mx-auto mt-10 max-w-3xl">
-          <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-accent-green/20 bg-accent-green/5 p-5 sm:flex-row">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-xl bg-accent-green/15 text-accent-green">
-                <Sparkles className="size-5" />
+        {/* 20-Day Free Trial Launch Banner */}
+        <Reveal className="mx-auto mt-10 max-w-4xl">
+          <div className="relative overflow-hidden rounded-2xl border border-accent-green/25 bg-gradient-to-r from-accent-green/10 via-card to-accent-green/5 p-5 shadow-sm sm:flex sm:items-center sm:justify-between sm:p-6">
+            <div className="flex items-start gap-4">
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-green/20 text-accent-green shadow-sm">
+                <Sparkles className="size-6" aria-hidden="true" />
               </span>
               <div>
-                <p className="font-heading font-bold">20-Day Free Trial</p>
-                <p className="text-sm text-muted-foreground">
-                  All Modules · Unlimited Users · Mobile Access · No credit card
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-heading text-base font-bold text-foreground sm:text-lg">
+                    Full Platform Access · 20-Day Free Trial
+                  </p>
+                  <span className="inline-flex items-center rounded-full bg-accent-green/20 px-2.5 py-0.5 text-xs font-semibold text-accent-green">
+                    No Credit Card Required
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                  Test-drive your workflows with real data, invite your team, and experience the exact operational turnaround before paying a rupee.
                 </p>
               </div>
             </div>
-            <span className="inline-flex items-center justify-center rounded-full bg-accent-green/15 px-5 py-2 text-sm font-semibold text-accent-green cursor-default">
-                🎉 Launching Soon
-              </span>
+            <div className="mt-4 shrink-0 sm:mt-0 sm:pl-4">
+              <Link
+                href="/wishlist"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-green px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-accent-green/20 transition-all hover:bg-accent-green/90 sm:w-auto"
+              >
+                Claim Free Trial
+                <ArrowRight className="size-4" />
+              </Link>
+            </div>
           </div>
         </Reveal>
 
-        {/* Billing toggle */}
-        <div className="mt-10 flex justify-center">
+        {/* Billing frequency toggle */}
+        <div className="mt-10 flex flex-col items-center justify-center gap-3">
           <div
             role="tablist"
-            aria-label="Billing period"
-            className="inline-flex flex-wrap items-center justify-center gap-1 rounded-full border border-border bg-muted p-1.5"
+            aria-label="Billing frequency selection"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/80 p-1.5 shadow-inner backdrop-blur-sm"
           >
-            {billingOptions.map((option) => (
-              <button
-                key={option.id}
-                role="tab"
-                aria-selected={billing === option.id}
-                onClick={() => setBilling(option.id)}
-                className={cn(
-                  "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                  billing === option.id
-                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {option.label}
-                {option.note && (
-                  <span
-                    className={cn(
-                      "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
-                      billing === option.id
-                        ? "bg-primary-foreground/20 text-primary-foreground"
-                        : "bg-accent-green/15 text-accent-green",
-                    )}
-                  >
-                    {option.note}
-                  </span>
-                )}
-              </button>
-            ))}
+            {billingOptions.map((option) => {
+              const isSelected = billing === option.id;
+              return (
+                <button
+                  key={option.id}
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setBilling(option.id)}
+                  className={cn(
+                    "relative flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:text-sm",
+                    isSelected
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <span>{option.label}</span>
+                  {option.badge && (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                        isSelected
+                          ? "bg-primary-foreground/20 text-primary-foreground"
+                          : "bg-accent-green/15 text-accent-green"
+                      )}
+                    >
+                      {option.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {billing === "annual" ? (
+              <span className="font-medium text-accent-green">
+                ✓ 20% Annual savings applied — enjoy 2 months free!
+              </span>
+            ) : billing === "half" ? (
+              <span className="font-medium text-accent-green">
+                ✓ 10% Semi-annual savings applied
+              </span>
+            ) : (
+              "Standard monthly billing, cancel anytime with 1 click."
+            )}
+          </p>
+        </div>
+
+        {/* Persona Pricing Cards Grid */}
+        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch">
+          {personaPlans.map((plan, i) => (
+            <PersonaCard
+              key={plan.id}
+              plan={plan}
+              billing={billing}
+              index={i}
+            />
+          ))}
+        </div>
+
+        {/* Enterprise Callout Banner */}
+        <Reveal className="mx-auto mt-14 max-w-4xl">
+          <div className="flex flex-col items-center justify-between gap-4 rounded-3xl border border-border bg-surface-alt/70 p-6 text-center sm:flex-row sm:text-left sm:p-8">
+            <div className="flex items-center gap-4">
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+                <ShieldCheck className="size-6" />
+              </span>
+              <div>
+                <h4 className="font-heading text-lg font-bold">
+                  Franchise Academy or Custom ERP Integration?
+                </h4>
+                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                  We support custom white-label deployments, dedicated account managers, tailored accounting sync, and strict SLAs for enterprises.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/contact"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:bg-muted"
+            >
+              Contact Enterprise Team
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function PersonaCard({
+  plan,
+  billing,
+  index,
+}: {
+  plan: PricingPersona;
+  billing: BillingPeriod;
+  index: number;
+}) {
+  const effectivePrice = calculateEffectiveMonthlyPrice(
+    plan.monthlyPrice,
+    billing
+  );
+  const hasDiscount = billing !== "monthly";
+
+  return (
+    <Reveal
+      delay={index * 0.1}
+      className={cn(
+        "relative flex h-full flex-col rounded-3xl border transition-all duration-300",
+        plan.highlight
+          ? "border-primary/50 bg-gradient-to-b from-primary/10 via-card to-card shadow-2xl shadow-primary/15 ring-2 ring-primary/20 lg:-translate-y-2 lg:scale-[1.02] z-10"
+          : "border-border bg-card hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-black/5"
+      )}
+    >
+      {/* Popular Badge for Highlighted Middle Plan */}
+      {plan.highlight && (
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-primary to-accent-yellow px-4 py-1 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/30">
+            <Sparkles className="size-3.5 fill-current" />
+            {plan.popularBadge || "Most Popular"}
+          </span>
+        </div>
+      )}
+
+      <div className="flex flex-1 flex-col p-6 sm:p-7">
+        {/* Tier Header & Pricing */}
+        <div className="border-b border-border/60 pb-5">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h3 className="font-heading text-xl font-bold tracking-tight">
+                {plan.planName}
+              </h3>
+              <p className="mt-0.5 text-xs font-medium text-muted-foreground">
+                {plan.tierSubtitle}
+              </p>
+            </div>
+            <span
+              className={cn(
+                "rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                plan.highlight
+                  ? "bg-primary/15 text-primary border border-primary/20"
+                  : "bg-muted text-muted-foreground"
+              )}
+            >
+              {plan.businessStage}
+            </span>
+          </div>
+
+          <div className="mt-5 flex items-baseline gap-2">
+            <span className="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+              ₹{effectivePrice.toLocaleString("en-IN")}
+            </span>
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold text-muted-foreground">
+                /month
+              </span>
+              {hasDiscount && (
+                <span className="text-[11px] text-muted-foreground line-through">
+                  ₹{plan.monthlyPrice.toLocaleString("en-IN")}
+                </span>
+              )}
+            </div>
+            {hasDiscount && (
+              <span className="ml-auto rounded-md bg-accent-green/15 px-2 py-0.5 text-[11px] font-bold text-accent-green">
+                Save {billing === "annual" ? "20%" : "10%"}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Plans */}
-        <div className="mt-12 grid gap-5 lg:grid-cols-4">
-          {plans.map((plan, i) => (
-            <Reveal
-              key={plan.name}
-              delay={i * 0.08}
-              className={cn(
-                "relative flex h-full flex-col rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1",
-                plan.highlight
-                  ? "border-primary/30 bg-gradient-to-b from-primary/5 to-transparent shadow-2xl shadow-primary/10 lg:scale-[1.03]"
-                  : `${plan.color} bg-card hover:shadow-xl hover:shadow-black/5`,
-              )}
-            >
-              {plan.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-bold text-primary-foreground shadow-md shadow-primary/20">
-                  Most Popular
+        {/* Persona Identity & Character Card */}
+        <div className="mt-6">
+          <div className="flex items-center gap-3.5">
+            <div className="relative size-14 shrink-0 overflow-hidden rounded-2xl border border-border bg-surface-alt shadow-sm">
+              <Image
+                src={plan.avatarImage}
+                alt={plan.avatarAlt}
+                width={80}
+                height={80}
+                className="h-full w-full object-cover object-top"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-foreground">
+                  {plan.personaName}
                 </span>
-              )}
-              <h3 className="font-heading text-lg font-bold">{plan.name}</h3>
-              <p className="mt-0.5 text-xs font-semibold text-primary">
-                {plan.subtitle}
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {plan.description}
-              </p>
-              <div className="mt-5 flex items-end gap-1">
-                {plan.isEnterprise ? (
-                  <span className="font-heading text-3xl font-extrabold tracking-tight">
-                    Custom
-                  </span>
-                ) : (
-                  <>
-                    <span className="font-heading text-3xl font-extrabold tracking-tight">
-                      ₹{formatPrice(plan.price, billing)}
-                    </span>
-                    <span className="mb-1 text-sm text-muted-foreground">
-                      /month
-                    </span>
-                  </>
-                )}
+                <span className="inline-block size-1.5 rounded-full bg-accent-green" />
               </div>
-              <ul className="mt-6 flex-1 space-y-2.5">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm">
-                    <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-accent-green/15 text-accent-green">
-                      <Check className="size-3" />
-                    </span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              {plan.limits.length > 0 && (
-                <div className="mt-4 rounded-2xl border border-border bg-surface-alt p-3">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Limits
-                  </p>
-                  <ul className="space-y-1">
-                    {plan.limits.map((limit) => (
-                      <li
-                        key={limit}
-                        className="flex items-center justify-between text-xs text-foreground/70"
-                      >
-                        <span>{limit.split(":")[0]}</span>
-                        <span className="font-medium">
-                          {limit.split(":")[1]}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <span
-                className={cn(
-                  "mt-6 w-full inline-flex items-center justify-center rounded-full font-semibold text-sm py-2 px-4 cursor-default",
-                  plan.highlight
-                    ? "bg-primary/10 text-primary"
-                    : "border-2 border-border text-muted-foreground",
-                )}
+              <p className="truncate text-xs text-muted-foreground font-medium">
+                {plan.personaRole}
+              </p>
+            </div>
+          </div>
+
+          {/* Persona Speech Bubble (First-Person Voice) */}
+          <div className="relative mt-3.5">
+            {/* Bubble Tail */}
+            <div className="absolute -top-2 left-6 size-0 border-x-8 border-x-transparent border-b-8 border-b-muted/80 dark:border-b-muted" />
+            <div className="rounded-2xl border border-border/80 bg-muted/50 p-4 backdrop-blur-xs dark:bg-muted/30">
+              <div className="flex items-start gap-2">
+                <Quote className="mt-0.5 size-4 shrink-0 text-primary/70" />
+                <p className="text-xs italic leading-relaxed text-foreground/90 sm:text-[13px]">
+                  &ldquo;{plan.quote}&rdquo;
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* "For You If" Line */}
+        <div className="mt-6 rounded-xl border border-border/60 bg-surface-alt/60 p-3.5">
+          <div className="flex items-start gap-2">
+            <UserCheck className="mt-0.5 size-4 shrink-0 text-primary" />
+            <p className="text-xs leading-relaxed text-foreground/90">
+              <strong className="font-semibold text-foreground">For you if: </strong>
+              {plan.forYouIf}
+            </p>
+          </div>
+        </div>
+
+        {/* Target Outcome Callout */}
+        <div className="mt-3 rounded-xl border border-accent-green/20 bg-accent-green/5 p-3.5">
+          <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 size-4 shrink-0 text-accent-green" />
+            <p className="text-xs font-medium leading-relaxed text-foreground">
+              <strong className="font-semibold text-accent-green">Target Outcome: </strong>
+              {plan.outcome}
+            </p>
+          </div>
+        </div>
+
+        {/* 3-4 Benefit-Based Differences (NO Modules Listed) */}
+        <div className="mt-6 flex-1">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            What transforms for your business:
+          </p>
+          <ul className="mt-3 space-y-2.5">
+            {plan.benefitDifferences.map((benefit, bIndex) => (
+              <li
+                key={bIndex}
+                className="flex items-start gap-2.5 text-xs leading-relaxed text-foreground/85 sm:text-[13px]"
               >
-                {plan.isEnterprise ? "Contact Sales — Coming Soon" : "Coming Soon"}
-              </span>
-            </Reveal>
-          ))}
+                <span
+                  className={cn(
+                    "mt-0.5 grid size-4 shrink-0 place-items-center rounded-full text-white shadow-xs",
+                    plan.highlight ? "bg-primary text-primary-foreground" : "bg-accent-green"
+                  )}
+                >
+                  <Check className="size-2.5 stroke-[3]" />
+                </span>
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* CTA Button */}
+        <div className="mt-8 pt-4">
+          <Link
+            href={plan.ctaHref}
+            className={cn(
+              "group flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+              plan.highlight
+                ? "bg-gradient-to-r from-primary via-accent-yellow to-primary bg-size-200 text-primary-foreground shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/35"
+                : "border-2 border-border bg-card text-foreground hover:border-primary hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            {plan.ctaText}
+            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+          </Link>
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            Includes 20-day unrestricted trial · Cancel anytime
+          </p>
         </div>
       </div>
-    </section>
+    </Reveal>
   );
 }
