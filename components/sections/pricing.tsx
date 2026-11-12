@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, ArrowRight, Check, Zap } from "lucide-react";
+import { ArrowRight, Check, Zap } from "lucide-react";
 import { PersonaAvatar } from "@/components/persona/persona-avatar";
 import { SectionHeading } from "@/components/section-heading";
 import { Reveal } from "@/components/reveal";
@@ -10,20 +10,15 @@ import { cn } from "@/lib/utils";
 import { personaPlans, type PricingPersona } from "@/data/pricing";
 
 /* -------------------------------------------------------------------------- */
-/*  Per-card staging: where the persona stands and which gesture it performs.  */
-/*  Order follows `personaPlans`.                                              */
-/*    blink : calm, only the eye blink built into PersonaAvatar                */
-/*    point : leans toward the feature card and a pointer shows the way down   */
-/*    nod   : greets the visitor with two small nods                           */
+/*  Per-card staging: where the persona stands. Order follows `personaPlans`. */
 /* -------------------------------------------------------------------------- */
 
 type Side = "right" | "left" | "center";
-type Gesture = "blink" | "point" | "nod";
 
-const STAGING: { stage: string; side: Side; gesture: Gesture }[] = [
-  { stage: "Capture", side: "right", gesture: "blink" },
-  { stage: "Run", side: "left", gesture: "point" },
-  { stage: "Grow", side: "center", gesture: "nod" },
+const STAGING: { stage: string; side: Side }[] = [
+  { stage: "Capture", side: "right" },
+  { stage: "Run", side: "left" },
+  { stage: "Grow", side: "center" },
 ];
 
 interface PricingProps {
@@ -207,45 +202,6 @@ function Handoff({
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Persona gestures                                                           */
-/* -------------------------------------------------------------------------- */
-
-function gestureMotion(gesture: Gesture, side: Side) {
-  switch (gesture) {
-    case "point": {
-      // Lean toward the card below; direction follows the side it stands on.
-      const dir = side === "left" ? 1 : -1;
-      return {
-        animate: {
-          rotate: [0, 4 * dir, 4 * dir, 0],
-          x: [0, 6 * dir, 6 * dir, 0],
-          y: [0, 3, 3, 0],
-        },
-        transition: {
-          duration: 4,
-          times: [0, 0.2, 0.75, 1],
-          repeat: Infinity,
-          ease: "easeInOut" as const,
-        },
-      };
-    }
-    case "nod":
-      // Two small nods, then a pause.
-      return {
-        animate: { y: [0, 7, 0, 7, 0, 0] },
-        transition: {
-          duration: 3.6,
-          times: [0, 0.1, 0.2, 0.3, 0.4, 1],
-          repeat: Infinity,
-          ease: "easeInOut" as const,
-        },
-      };
-    default:
-      return { animate: undefined, transition: undefined };
-  }
-}
-
-/* -------------------------------------------------------------------------- */
 /*  Agent card                                                                 */
 /* -------------------------------------------------------------------------- */
 
@@ -255,10 +211,8 @@ interface AgentCardProps {
 }
 
 function AgentCard({ plan, index }: AgentCardProps) {
-  const reduceMotion = useReducedMotion();
-  const { stage, side, gesture } =
+  const { stage, side } =
     STAGING[index] ?? STAGING[STAGING.length - 1];
-  const motionProps = gestureMotion(gesture, side);
 
   return (
     <Reveal
@@ -285,39 +239,13 @@ function AgentCard({ plan, index }: AgentCardProps) {
           side === "center" && "left-1/2 w-[62%] -translate-x-1/2 justify-center"
         )}
       >
-        <motion.div
-          className="flex h-full w-full items-end justify-center"
-          style={{
-            transformOrigin:
-              side === "left" ? "35% 100%" : side === "right" ? "65% 100%" : "50% 100%",
-          }}
-          animate={reduceMotion ? undefined : motionProps.animate}
-          transition={motionProps.transition}
-        >
-          {/* Only the "blink" card keeps the built-in eye blink, so every
-              card shows one clear gesture. */}
+        <div className="flex h-full w-full items-end justify-center">
           <PersonaAvatar
             planId={plan.id}
-            reduceMotion={gesture === "blink" ? !!reduceMotion : true}
             className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
           />
-        </motion.div>
+        </div>
       </div>
-
-      {/* Pointer that shows the way to the feature cards (point gesture only) */}
-      {gesture === "point" && (
-        <motion.span
-          aria-hidden="true"
-          className={cn(
-            "absolute top-[5.75rem] z-10 grid size-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 sm:top-[6.25rem]",
-            side === "left" ? "left-8 sm:left-9" : "right-8 sm:right-9"
-          )}
-          animate={reduceMotion ? undefined : { y: [0, 8, 0] }}
-          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ArrowDown className="size-4" strokeWidth={3} />
-        </motion.span>
-      )}
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         {/* Header: always clear of the persona */}
