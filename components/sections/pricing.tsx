@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useMotionValue,
+  useAnimationFrame,
+} from "framer-motion";
 import {
   ArrowRight,
   Sparkles,
@@ -11,7 +15,10 @@ import {
   VolumeX,
   Play,
   Square,
+  Check,
+  Mic,
 } from "lucide-react";
+import { PersonaAvatar } from "@/components/sections/persona-avatar";
 import { SectionHeading } from "@/components/section-heading";
 import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
@@ -443,6 +450,36 @@ function PersonaCard({
   const hasDiscount = billing !== "monthly";
   const isTalking = isSpeaking && !reduceMotion;
 
+  // Voice amplitude (0..1) tracked every frame — drives jaw, bob and rings
+  const level = useMotionValue(0);
+  const fftRef = useRef<Uint8Array | null>(null);
+  useAnimationFrame((time) => {
+    let target = 0;
+    if (isSpeaking && !reduceMotion) {
+      if (analyser) {
+        const binCount = analyser.frequencyBinCount;
+        const search = Math.floor(binCount * 0.72);
+        if (!fftRef.current || fftRef.current.length !== search) {
+          fftRef.current = new Uint8Array(search);
+        }
+        analyser.getByteFrequencyData(fftRef.current);
+        let sum = 0;
+        for (let i = 0; i < search; i++) sum += fftRef.current[i];
+        const avg = sum / search / 255;
+        // Perceptual curve: boost mids so small syllables register
+        target = Math.min(1, Math.pow(avg, 1.35) * 1.6);
+      } else {
+        // Web Speech fallback can't be analysed — synthesize a syllable envelope
+        const t = time / 1000;
+        const a = (Math.sin(t * 9.1 + 1.7) + 1) / 2;
+        const b = (Math.sin(t * 13.6 + 0.6) + 1) / 2;
+        const c = (Math.sin(t * 4.7) + 1) / 2;
+        target = Math.min(1, 0.16 + a * 0.42 + b * 0.26 + c * 0.18);
+      }
+    }
+    level.set(level.get() + (target - level.get()) * 0.38);
+  });
+
   return (
     <Reveal
       delay={index * 0.1}
@@ -464,7 +501,7 @@ function PersonaCard({
       )}
 
       <div className="flex flex-1 flex-col p-6 sm:p-7">
-        {/* 1. Plan Name & Persona Persona Header */}
+        {/* 1. Plan Name & Persona Header */}
         <div className="text-center">
           <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             {plan.planName}
@@ -474,77 +511,75 @@ function PersonaCard({
           </p>
         </div>
 
-        {/* 2. Animated Speech Bubble with 1st-Person Spoken Message */}
+        {/* 2. Voice Controller — the pitch is SPOKEN here, not shown as text */}
         <div className="relative mt-5">
-          <motion.div
-            layout
+          <div
             className={cn(
-              "relative rounded-2xl border p-4 shadow-sm transition-all duration-300",
+              "relative flex items-center justify-between gap-3 rounded-2xl border py-2 pl-2.5 pr-3 shadow-sm transition-all duration-300",
               isSpeaking
                 ? "border-primary/50 bg-primary/10 ring-2 ring-primary/20 shadow-md shadow-primary/10"
                 : "border-border/80 bg-muted/60 dark:bg-muted/30"
             )}
           >
-            {/* Speech Bubble Tail pointing down to the character */}
+            {/* Speech bubble tail pointing down to the character */}
             <div
+              aria-hidden="true"
               className={cn(
-                "absolute -bottom-2.5 left-1/2 -translate-x-1/2 size-0 border-x-8 border-x-transparent border-t-8 transition-colors",
+                "absolute -bottom-2.5 left-1/2 size-0 -translate-x-1/2 border-x-8 border-t-8 border-x-transparent transition-colors",
                 isSpeaking
                   ? "border-t-primary/30"
                   : "border-t-border/80 dark:border-t-muted"
               )}
             />
 
-            {/* Spoken Quote */}
-            <p className="text-xs italic leading-relaxed text-foreground sm:text-[13px]">
-              &ldquo;{plan.speechScript}&rdquo;
-            </p>
-
-            {/* Speak / Pause Interactive Controller */}
-            <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-2.5">
-              <button
-                type="button"
-                onClick={onTogglePlay}
-                aria-label={
-                  isSpeaking
-                    ? `Stop speech for ${plan.characterName}`
-                    : `Listen to ${plan.characterName} speak`
-                }
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                  isSpeaking
-                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90"
-                    : "bg-card border border-border text-foreground hover:bg-muted hover:border-primary/30"
-                )}
-              >
-                {isSpeaking ? (
-                  <>
-                    <Square className="size-3 fill-current" />
-                    <span>Stop Voice</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="size-3 fill-current" />
-                    <span>Hear {plan.characterName.split(" ")[0]} Speak</span>
-                  </>
-                )}
-              </button>
-
-              {/* Live Audio Waveform — real FFT bars for files, voice-reactive for speech */}
-              {isSpeaking && (
-                <AudioWaveVisualizer
-                  active={isSpeaking}
-                  analyser={analyser}
-                  bars={7}
-                  className="text-primary"
-                />
+            <button
+              type="button"
+              onClick={onTogglePlay}
+              aria-label={
+                isSpeaking
+                  ? `Stop speech for ${plan.characterName}`
+                  : `Listen to ${plan.characterName} speak`
+              }
+              aria-pressed={isSpeaking}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                isSpeaking
+                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90"
+                  : "bg-card border border-border text-foreground hover:bg-muted hover:border-primary/30"
               )}
-            </div>
-          </motion.div>
+            >
+              {isSpeaking ? (
+                <>
+                  <Square className="size-3 fill-current" />
+                  <span>Stop Voice</span>
+                </>
+              ) : (
+                <>
+                  <Play className="size-3 fill-current" />
+                  <span>Hear {plan.characterName.split(" ")[0]} Speak</span>
+                </>
+              )}
+            </button>
+
+            {/* Live waveform while speaking, subtle hint otherwise */}
+            {isSpeaking ? (
+              <AudioWaveVisualizer
+                active={isSpeaking}
+                analyser={analyser}
+                bars={6}
+                className="text-primary"
+              />
+            ) : (
+              <span className="hidden items-center gap-1.5 pr-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:inline-flex">
+                <Mic className="size-3.5" aria-hidden="true" />
+                Tap to hear
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* 3. The Character Image — PNG talks (bob, sway & sound rings) while speaking */}
-        <div className="relative my-4 flex flex-1 items-center justify-center">
+        {/* 3. The Persona — SVG character that lip-syncs and bobs to the voice */}
+        <div className="relative my-2 flex flex-col items-center justify-center">
           {/* Expanding sound rings behind the character */}
           {isTalking && (
             <>
@@ -552,83 +587,86 @@ function PersonaCard({
                 <motion.span
                   key={ring}
                   aria-hidden="true"
-                  className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-40 w-40 rounded-full border-2 border-primary/30 sm:h-44 sm:w-44"
+                  className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-36 w-36 rounded-full border-2 border-primary/30 sm:h-40 sm:w-40"
                   animate={{
                     x: "-50%",
                     y: "-50%",
-                    scale: [0.55, 1.9],
-                    opacity: [0.55, 0],
+                    scale: [0.55, 2.05],
+                    opacity: [0.6, 0],
                   }}
                   transition={{
-                    duration: 1.9,
+                    duration: 1.8,
                     repeat: Infinity,
                     ease: "easeOut",
-                    delay: ring * 0.62,
+                    delay: ring * 0.6,
                   }}
                 />
               ))}
             </>
           )}
 
-          <div className="relative h-60 w-full sm:h-64">
-            {/* Talking motion: vertical bob + head sway + breath of the torso */}
+          {/* Character: mouth and head move with the actual voice amplitude */}
+          <PersonaAvatar
+            planId={plan.id}
+            level={level}
+            reduceMotion={!!reduceMotion}
+            className="relative z-10 h-44 w-40 drop-shadow-xl transition-all duration-300 group-hover:scale-[1.03] sm:h-48 sm:w-48"
+          />
+
+          {/* Speaking status chip with mini waveform */}
+          {isSpeaking && (
             <motion.div
-              className="relative h-full w-full"
-              animate={
-                isTalking
-                  ? {
-                      y: [0, -10, -4, -9, 0],
-                      rotate: [0, -1.5, 1, -0.8, 0],
-                      scale: [1, 1.06, 1.02, 1.05, 1],
-                    }
-                  : { y: 0, rotate: 0, scale: 1 }
-              }
-              transition={
-                isTalking
-                  ? { duration: 0.9, repeat: Infinity, ease: "easeInOut" }
-                  : { duration: 0.35, ease: "easeOut" }
-              }
+              initial={{ opacity: 0, y: 6, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              className="pointer-events-none absolute bottom-0 left-1/2 z-20 flex items-center gap-2 rounded-full border border-primary/30 bg-card/95 py-1 pl-2.5 pr-3 shadow-lg backdrop-blur-sm"
             >
-              <Image
-                src={plan.characterImage}
-                alt={plan.characterAlt}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
-                className={cn(
-                  "object-contain drop-shadow-md transition-transform duration-300",
-                  isSpeaking ? "drop-shadow-xl" : "group-hover:scale-102"
-                )}
-                priority={plan.highlight}
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-primary" />
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
+                Speaking
+              </span>
+              <AudioWaveVisualizer
+                active={isSpeaking}
+                analyser={analyser}
+                bars={4}
+                tall
+                className="text-primary"
               />
             </motion.div>
-
-            {/* Speaking status chip with mini waveform */}
-            {isSpeaking && (
-              <motion.div
-                initial={{ opacity: 0, y: 6, x: "-50%" }}
-                animate={{ opacity: 1, y: 0, x: "-50%" }}
-                className="pointer-events-none absolute bottom-1 left-1/2 flex items-center gap-2 rounded-full border border-primary/30 bg-card/90 py-1 pl-2.5 pr-3 shadow-lg backdrop-blur-sm"
-              >
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
-                  Speaking
-                </span>
-                <AudioWaveVisualizer
-                  active={isSpeaking}
-                  analyser={analyser}
-                  bars={4}
-                  tall
-                  className="text-primary"
-                />
-              </motion.div>
-            )}
-          </div>
+          )}
         </div>
 
-        {/* 4. Price Display */}
+        {/* 4. What's included in this package */}
+        <ul className="mt-2 flex-1 space-y-1.5 border-t border-border/60 pt-3">
+          {plan.features.map((feature) => {
+            const isDivider = feature.startsWith("Everything in");
+            if (isDivider) {
+              return (
+                <li
+                  key={feature}
+                  className="pt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground"
+                >
+                  {feature}
+                </li>
+              );
+            }
+            return (
+              <li
+                key={feature}
+                className="flex items-start gap-2 text-[11px] font-medium leading-snug text-foreground/90 sm:text-xs"
+              >
+                <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-accent-green/15 text-accent-green">
+                  <Check className="size-2.5" strokeWidth={3.5} aria-hidden="true" />
+                </span>
+                <span>{feature}</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* 5. Price Display */}
         <div className="border-t border-border/60 pt-4 text-center">
           <div className="flex items-baseline justify-center gap-1.5">
             <span className="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
@@ -658,7 +696,7 @@ function PersonaCard({
           </div>
         </div>
 
-        {/* 5. CTA Button */}
+        {/* 6. CTA Button */}
         <div className="mt-5">
           <Link
             href={plan.ctaHref}
