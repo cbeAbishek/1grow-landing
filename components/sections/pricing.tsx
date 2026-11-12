@@ -1,13 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type RefObject } from "react";
 import Link from "next/link";
-import {
-  motion,
-  useReducedMotion,
-  useMotionValue,
-  useAnimationFrame,
-} from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Sparkles,
@@ -18,7 +13,8 @@ import {
   Check,
   Mic,
 } from "lucide-react";
-import { PersonaAvatar } from "@/components/sections/persona-avatar";
+import { PersonaAvatar } from "@/components/persona/persona-avatar";
+import { useLipSync, visemeUrlFor } from "@/components/persona/use-lip-sync";
 import { SectionHeading } from "@/components/section-heading";
 import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
@@ -416,6 +412,7 @@ export function Pricing({
               index={i}
               isSpeaking={activeSpeakerId === plan.id && isSpeaking}
               analyser={analyser}
+              audioRef={audioRef}
               onTogglePlay={() => handleTogglePlay(plan)}
             />
           ))}
@@ -431,6 +428,7 @@ interface PersonaCardProps {
   index: number;
   isSpeaking: boolean;
   analyser: AnalyserNode | null;
+  audioRef: RefObject<HTMLAudioElement | null>;
   onTogglePlay: () => void;
 }
 
@@ -440,6 +438,7 @@ function PersonaCard({
   index,
   isSpeaking,
   analyser,
+  audioRef,
   onTogglePlay,
 }: PersonaCardProps) {
   const reduceMotion = useReducedMotion();
@@ -450,34 +449,13 @@ function PersonaCard({
   const hasDiscount = billing !== "monthly";
   const isTalking = isSpeaking && !reduceMotion;
 
-  // Voice amplitude (0..1) tracked every frame — drives jaw, bob and rings
-  const level = useMotionValue(0);
-  const fftRef = useRef<Uint8Array | null>(null);
-  useAnimationFrame((time) => {
-    let target = 0;
-    if (isSpeaking && !reduceMotion) {
-      if (analyser) {
-        const binCount = analyser.frequencyBinCount;
-        const search = Math.floor(binCount * 0.72);
-        if (!fftRef.current || fftRef.current.length !== search) {
-          fftRef.current = new Uint8Array(search);
-        }
-        analyser.getByteFrequencyData(fftRef.current);
-        let sum = 0;
-        for (let i = 0; i < search; i++) sum += fftRef.current[i];
-        const avg = sum / search / 255;
-        // Perceptual curve: boost mids so small syllables register
-        target = Math.min(1, Math.pow(avg, 1.35) * 1.6);
-      } else {
-        // Web Speech fallback can't be analysed — synthesize a syllable envelope
-        const t = time / 1000;
-        const a = (Math.sin(t * 9.1 + 1.7) + 1) / 2;
-        const b = (Math.sin(t * 13.6 + 0.6) + 1) / 2;
-        const c = (Math.sin(t * 4.7) + 1) / 2;
-        target = Math.min(1, 0.16 + a * 0.42 + b * 0.26 + c * 0.18);
-      }
-    }
-    level.set(level.get() + (target - level.get()) * 0.38);
+  // Voice amplitude (0..1) drives jaw, bob, rings — visemes > FFT > envelope
+  const lipLevel = useLipSync({
+    speaking: isSpeaking,
+    reduceMotion: !!reduceMotion,
+    analyser,
+    visemeUrl: visemeUrlFor(plan.audioFile),
+    audioRef,
   });
 
   return (
@@ -608,9 +586,10 @@ function PersonaCard({
           {/* Character: mouth and head move with the actual voice amplitude */}
           <PersonaAvatar
             planId={plan.id}
-            level={level}
+            lipLevel={lipLevel}
+            isSpeaking={isSpeaking}
             reduceMotion={!!reduceMotion}
-            className="relative z-10 h-44 w-40 drop-shadow-xl transition-all duration-300 group-hover:scale-[1.03] sm:h-48 sm:w-48"
+            className="relative z-10 h-44 w-auto drop-shadow-xl transition-all duration-300 group-hover:scale-[1.03] sm:h-48"
           />
 
           {/* Speaking status chip with mini waveform */}
