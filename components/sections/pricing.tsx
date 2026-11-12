@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check, Zap } from "lucide-react";
 import { PersonaAvatar } from "@/components/persona/persona-avatar";
 import { SectionHeading } from "@/components/section-heading";
@@ -78,17 +77,9 @@ export function Pricing({
         />
 
         {/* The relay. pt-44 is the headroom the personas rise into. */}
-        <div className="flex flex-col items-stretch pt-44 lg:flex-row lg:pt-48">
+        <div className="flex flex-col gap-40 pt-44 sm:gap-44 lg:flex-row lg:gap-6 lg:pt-48">
           {plans.map((plan, i) => (
-            <div key={plan.id} className="contents">
-              <AgentCard plan={plan} index={i} />
-              {i < plans.length - 1 && (
-                <Handoff
-                  fromName={plan.characterName}
-                  toName={plans[i + 1].characterName}
-                />
-              )}
-            </div>
+            <AgentCard key={plan.id} plan={plan} index={i} />
           ))}
         </div>
       </div>
@@ -134,70 +125,6 @@ function TrialTrigger() {
         <ArrowRight className="size-4" aria-hidden="true" />
       </Link>
     </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Handoff rail between agents                                                */
-/* -------------------------------------------------------------------------- */
-
-function Handoff({
-  fromName,
-  toName,
-}: {
-  fromName: string;
-  toName: string;
-}) {
-  const reduceMotion = useReducedMotion();
-  const label = `${fromName} hands work to ${toName}`;
-
-  return (
-    <>
-      {/* Desktop: horizontal rail at header height */}
-      <div
-        role="img"
-        aria-label={label}
-        className="relative hidden w-14 shrink-0 self-start lg:mt-16 lg:block xl:w-20"
-      >
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
-        {!reduceMotion && (
-          <motion.span
-            className="absolute top-0 size-2.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_14px_3px] shadow-primary/50"
-            animate={{ left: ["0%", "100%"], opacity: [0, 1, 1, 0] }}
-            transition={{
-              duration: 2.4,
-              repeat: Infinity,
-              ease: "easeInOut",
-              repeatDelay: 0.6,
-            }}
-          />
-        )}
-        <span className="absolute left-1/2 top-0 grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-sm">
-          <ArrowRight className="size-3.5" aria-hidden="true" />
-        </span>
-      </div>
-
-      {/* Mobile and tablet: vertical rail through the headroom */}
-      <div
-        role="img"
-        aria-label={label}
-        className="relative mx-auto h-44 w-px lg:hidden"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-border via-primary/40 to-border" />
-        {!reduceMotion && (
-          <motion.span
-            className="absolute left-1/2 size-2.5 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_14px_3px] shadow-primary/50"
-            animate={{ top: ["0%", "100%"], opacity: [0, 1, 1, 0] }}
-            transition={{
-              duration: 2.2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              repeatDelay: 0.5,
-            }}
-          />
-        )}
-      </div>
-    </>
   );
 }
 
