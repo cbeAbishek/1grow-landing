@@ -8,25 +8,27 @@ export interface BillingOption {
   savingsLabel?: string;
 }
 
+export interface VoiceConfig {
+  rate: number;
+  pitch: number;
+  lang: string;
+}
+
 export interface PricingPersona {
   id: string;
   planName: string;
-  tierSubtitle: string;
-  personaName: string;
-  personaRole: string;
-  businessStage: string;
-  avatarImage: string;
-  avatarAlt: string;
-  quote: string; // 1st person speech bubble quote
-  forYouIf: string;
-  outcome: string;
-  benefitDifferences: string[]; // 3-4 benefit-based differences (NO modules listed)
+  characterName: string;
+  characterRole: string;
+  characterImage: string;
+  characterAlt: string;
+  speechScript: string; // Spoken first-person message
+  audioFile?: string; // Optional audio file from public/audio/
+  voiceConfig: VoiceConfig;
   monthlyPrice: number;
   highlight: boolean;
   popularBadge?: string;
   ctaText: string;
   ctaHref: string;
-  accentColor: "primary" | "blue" | "green";
 }
 
 export const billingOptions: BillingOption[] = [
@@ -55,84 +57,63 @@ export const personaPlans: PricingPersona[] = [
   {
     id: "solo",
     planName: "Solo Plan",
-    tierSubtitle: "For Independent Operators & Single Locations",
-    personaName: "Karthik Sundaram",
-    personaRole: "Founder & Head Coach, Pulse Martial Arts",
-    businessStage: "Solo Owner · 1 Location",
-    avatarImage: "/assert/solo.png",
-    avatarAlt: "Karthik Sundaram - Solo Academy Owner",
-    quote:
-      "Before 1Grow, I spent two hours every evening reconciling UPI screenshots, updating registers, and awkwardly texting parents for fee dues. With this plan, reminders go out automatically, attendance takes two taps on my phone, and I finally have my evenings back.",
-    forYouIf:
-      "You run your coaching academy, rental counter, or studio solo and need to end manual spreadsheet chaos.",
-    outcome:
-      "Reclaim 15+ admin hours every week and recover 100% of overlooked fee payments.",
-    benefitDifferences: [
-      "Zero awkward fee chasing with automated WhatsApp payment reminders and direct UPI collection links.",
-      "One-tap mobile attendance and check-in that keeps parent communication instant and transparent.",
-      "Live calendar availability to eliminate double-booking mistakes permanently.",
-      "Instant daily revenue snapshot on mobile so you always know your exact cash flow and pending dues.",
-    ],
+    characterName: "Karthik Sundaram",
+    characterRole: "Solo Academy & Studio Owner",
+    characterImage: "/assert/solo.png",
+    characterAlt: "Karthik - Solo Academy Owner",
+    speechScript:
+      "Hey there! Before 1Grow, I was losing two hours every night chasing fee dues on WhatsApp and updating messy notebooks. With the Solo plan, payment reminders go out automatically, attendance takes two taps on my phone, and I finally got my evenings back. If you run your counter solo, this is made for you!",
+    audioFile: "/audio/solo.mp3",
+    voiceConfig: {
+      rate: 0.98,
+      pitch: 1.0,
+      lang: "en-IN",
+    },
     monthlyPrice: 999,
     highlight: false,
     ctaText: "Start 20-Day Free Trial",
     ctaHref: "/wishlist",
-    accentColor: "blue",
   },
   {
     id: "business",
     planName: "Business Plan",
-    tierSubtitle: "For Expanding Teams & Multi-Branch Hubs",
-    personaName: "Ananya Krishnan",
-    personaRole: "Managing Director, Spark Studios & Stage Rentals",
-    businessStage: "Growing Team · Up to 3 Branches",
-    avatarImage: "/assert/business.png",
-    avatarAlt: "Ananya Krishnan - Multi-Branch Business Director",
-    quote:
-      "When we grew to three locations, staff miscommunication and double-booked inventory almost broke us. This plan gave my branch managers delegated autonomy with strict role permissions, while giving me live oversight across all locations without micromanaging.",
-    forYouIf:
-      "You manage multiple branches or a growing staff team and need delegated control with unified executive visibility.",
-    outcome:
-      "Synchronize multi-location operations seamlessly and eliminate scheduling clashes across teams.",
-    benefitDifferences: [
-      "Multi-branch centralized dashboard with custom role permissions so managers only access their own floor.",
-      "Cross-location resource scheduling to guarantee equipment, staff, and slots are never double-committed.",
-      "Automated WhatsApp workflows for instant booking confirmations, dispatches, and client status updates.",
-      "Dedicated 24/7 self-service client portal for transparent schedules, invoices, and booking histories.",
-    ],
+    characterName: "Ananya Krishnan",
+    characterRole: "Multi-Branch Managing Director",
+    characterImage: "/assert/business.png",
+    characterAlt: "Ananya - Multi-Branch Business Director",
+    speechScript:
+      "Hi! When we scaled to three locations, miscommunication and double-booked inventory almost broke our business. The Business plan gave my branch managers role-based autonomy while giving me a live bird's-eye view of every location's revenue and operations. It keeps our entire team synchronized without micromanagement.",
+    audioFile: "/audio/business.mp3",
+    voiceConfig: {
+      rate: 0.96,
+      pitch: 1.1,
+      lang: "en-IN",
+    },
     monthlyPrice: 1899,
     highlight: true,
-    popularBadge: "Most Popular · Founder's Choice",
+    popularBadge: "Most Popular",
     ctaText: "Start 20-Day Free Trial",
     ctaHref: "/wishlist",
-    accentColor: "primary",
   },
   {
     id: "complete",
     planName: "Scale Plan",
-    tierSubtitle: "For Multi-Service Companies & Large Operations",
-    personaName: "Vikramaditya Sengupta",
-    personaRole: "CEO, Apex Academy & Grand Events Group",
-    businessStage: "Enterprise Scale · Up to 10 Branches",
-    avatarImage: "/assert/complete.png",
-    avatarAlt: "Vikramaditya Sengupta - Multi-Service Enterprise CEO",
-    quote:
-      "We operate multi-city academies, corporate event teams, and extensive rental fleets. We couldn't afford disconnected tools or restrictive record caps. This plan powers our entire business with predictive revenue forecasting and automated follow-ups that win high-ticket clients before competitors reply.",
-    forYouIf:
-      "You run an established multi-service business or multi-city network requiring AI intelligence and unlimited record capacity.",
-    outcome:
-      "Achieve total operational independence with predictive AI revenue analytics and VIP support.",
-    benefitDifferences: [
-      "Predictive AI revenue forecasting and smart follow-up automation that converts high-intent enquiries faster.",
-      "Unlimited operational capacity with no restrictions on records, client accounts, or booking volume.",
-      "Full multi-portal ecosystem (students, rental clients, vendor partners) under your unified brand.",
-      "Dedicated VIP onboarding specialist and prioritized support response to guarantee zero operational downtime.",
-    ],
+    characterName: "Vikramaditya Sengupta",
+    characterRole: "Multi-Service Enterprise CEO",
+    characterImage: "/assert/complete.png",
+    characterAlt: "Vikramaditya - Multi-Service Enterprise CEO",
+    speechScript:
+      "Hello! We operate multi-city academies, corporate event teams, and extensive rental fleets. We couldn't afford disconnected tools or artificial record limits. This plan runs our entire company end-to-end with predictive AI revenue forecasting and automated lead follow-ups that close high-ticket clients before competitors reply.",
+    audioFile: "/audio/complete.mp3",
+    voiceConfig: {
+      rate: 0.95,
+      pitch: 0.9,
+      lang: "en-IN",
+    },
     monthlyPrice: 2499,
     highlight: false,
     ctaText: "Start 20-Day Free Trial",
     ctaHref: "/wishlist",
-    accentColor: "green",
   },
 ];
 
@@ -143,8 +124,4 @@ export function calculateEffectiveMonthlyPrice(
   const option = billingOptions.find((opt) => opt.id === billingPeriod);
   if (!option || option.discountRate === 0) return baseMonthlyPrice;
   return Math.round(baseMonthlyPrice * (1 - option.discountRate));
-}
-
-export function calculateAnnualTotal(baseMonthlyPrice: number): number {
-  return Math.round(baseMonthlyPrice * 12 * 0.8);
 }

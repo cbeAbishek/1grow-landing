@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
-  Check,
   Sparkles,
-  Quote,
-  TrendingUp,
-  UserCheck,
-  ShieldCheck,
+  Volume2,
+  VolumeX,
+  Play,
+  Square,
 } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { Reveal } from "@/components/reveal";
@@ -35,6 +35,225 @@ export function Pricing({
   id = "pricing",
 }: PricingProps) {
   const [billing, setBilling] = useState<BillingPeriod>("annual");
+  const [activeSpeakerId, setActiveSpeakerId] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+  const isMutedRef = useRef<boolean>(isMuted);
+  isMutedRef.current = isMuted;
+
+  // Tear down the Web Audio analyser so waveforms stop cleanly
+  const teardownAnalyser = useCallback(() => {
+    setAnalyser(null);
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+  }, []);
+
+  // Single-speaker cancel / cleanup function
+  const stopAllSpeech = useCallback(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    if (audioRef.current) {
+      audioRef.current.onplay = null;
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    teardownAnalyser();
+    setActiveSpeakerId(null);
+    setIsSpeaking(false);
+  }, [teardownAnalyser]);
+
+  // Web Speech API playback helper
+  const playWebSpeech = useCallback(
+    (plan: PricingPersona) => {
+      if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+        setActiveSpeakerId(null);
+        setIsSpeaking(false);
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(plan.speechScript);
+      utterance.rate = plan.voiceConfig.rate;
+      utterance.pitch = plan.voiceConfig.pitch;
+
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const preferredVoice =
+          voices.find((v) => v.lang === plan.voiceConfig.lang) ||
+          voices.find((v) => v.lang.startsWith("en-IN")) ||
+          voices.find((v) => v.lang.startsWith("en")) ||
+          null;
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+      }
+
+      utterance.onstart = () => {
+        if (isMutedRef.current) {
+          window.speechSynthesis.cancel();
+          return;
+        }
+        setActiveSpeakerId(plan.id);
+        setIsSpeaking(true);
+      };
+
+      utterance.onend = () => {
+        setActiveSpeakerId(null);
+        setIsSpeaking(false);
+      };
+
+      utterance.onerror = () => {
+        setActiveSpeakerId(null);
+        setIsSpeaking(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    },
+    []
+  );
+
+  // Playback controller: handles optional audio file fallback to Web Speech API
+  const handleTogglePlay = useCallback(
+    (plan: PricingPersona) => {
+      // If currently speaking this persona, stop playback
+      if (activeSpeakerId === plan.id && isSpeaking) {
+        stopAllSpeech();
+        return;
+      }
+
+      // Stop any other active speaker immediately (Single-speaker control)
+      stopAllSpeech();
+
+      // If muted, unmute on explicit play click
+      if (isMuted) {
+        isMutedRef.current = false;
+        setIsMuted(false);
+      }
+
+      // Attempt optional pre-recorded audio file if defined
+      if (plan.audioFile) {
+        const audio = new Audio(plan.audioFile);
+        audioRef.current = audio;
+        audio.muted = isMutedRef.current;
+        audio.preload = "auto";
+
+        const wireAnalyser = () => {
+          try {
+            const AudioCtx =
+              window.AudioContext ||
+              (window as unknown as { webkitAudioContext?: typeof AudioContext })
+                .webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const source = ctx.createMediaElementSource(audio);
+            const node = ctx.createAnalyser();
+            node.fftSize = 64;
+            node.smoothingTimeConstant = 0.78;
+            source.connect(node);
+            node.connect(ctx.destination);
+            audioContextRef.current = ctx;
+            setAnalyser(node);
+            if (ctx.state === "suspended") ctx.resume().catch(() => {});
+          } catch {
+            // Waveform is decorative — never block playback
+          }
+        };
+
+        let fallbackStarted = false;
+        const fallbackToVoice = () => {
+          if (fallbackStarted) return;
+          fallbackStarted = true;
+          // File missing/unplayable in public/audio — use Web Speech API instead
+          teardownAnalyser();
+          audioRef.current = null;
+          playWebSpeech(plan);
+        };
+
+        audio.onplay = () => {
+          setActiveSpeakerId(plan.id);
+          setIsSpeaking(true);
+        };
+
+        audio.onended = () => {
+          setActiveSpeakerId(null);
+          setIsSpeaking(false);
+          audioRef.current = null;
+          teardownAnalyser();
+        };
+
+        audio.onerror = fallbackToVoice;
+
+        // Wire the analyser BEFORE playback starts, inside the user gesture.
+        // If the AudioContext stays suspended, the routed media element would play silently.
+        wireAnalyser();
+
+        audio.play().catch(fallbackToVoice);
+      } else {
+        playWebSpeech(plan);
+      }
+    },
+    [
+      activeSpeakerId,
+      isSpeaking,
+      isMuted,
+      stopAllSpeech,
+      playWebSpeech,
+      teardownAnalyser,
+    ]
+  );
+
+  // Global Mute Toggle
+  const toggleGlobalMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const next = !prev;
+      if (next) {
+        stopAllSpeech();
+      }
+      return next;
+    });
+  }, [stopAllSpeech]);
+
+  // Automatic speech cancellation on component unmount
+  useEffect(() => {
+    return () => {
+      stopAllSpeech();
+    };
+  }, [stopAllSpeech]);
+
+  // Automatic speech cancellation when leaving the tab or hiding window
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopAllSpeech();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [stopAllSpeech]);
+
+  // Pre-load synthesis voices for low-latency playback
+  useEffect(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
 
   return (
     <section
@@ -48,11 +267,11 @@ export function Pricing({
             eyebrow="Persona-Based Pricing"
             title={
               <>
-                Plans built for how you{" "}
-                <span className="text-gradient">actually run</span> your business
+                Meet the founders{" "}
+                <span className="text-gradient">scaling on 1Grow</span>
               </>
             }
-            description="No confusing module checklists or per-feature paywalls. Hear directly from founders at your stage, choose the outcome you need, and scale without friction."
+            description="Listen to real business owners speak directly to your operational stage. No static module checklists—just genuine business outcomes."
             accentColor="primary"
           />
         )}
@@ -74,7 +293,7 @@ export function Pricing({
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                  Test-drive your workflows with real data, invite your team, and experience the exact operational turnaround before paying a rupee.
+                  Experience the exact operational turnaround before paying a single rupee. All features unlocked.
                 </p>
               </div>
             </div>
@@ -90,45 +309,81 @@ export function Pricing({
           </div>
         </Reveal>
 
-        {/* Billing frequency toggle */}
-        <div className="mt-10 flex flex-col items-center justify-center gap-3">
-          <div
-            role="tablist"
-            aria-label="Billing frequency selection"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/80 p-1.5 shadow-inner backdrop-blur-sm"
-          >
-            {billingOptions.map((option) => {
-              const isSelected = billing === option.id;
-              return (
-                <button
-                  key={option.id}
-                  role="tab"
-                  aria-selected={isSelected}
-                  onClick={() => setBilling(option.id)}
-                  className={cn(
-                    "relative flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:text-sm",
-                    isSelected
-                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <span>{option.label}</span>
-                  {option.badge && (
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
-                        isSelected
-                          ? "bg-primary-foreground/20 text-primary-foreground"
-                          : "bg-accent-green/15 text-accent-green"
-                      )}
-                    >
-                      {option.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+        {/* Billing frequency toggle & Global Audio Controls */}
+        <div className="mt-10 flex flex-col items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {/* Billing Periods */}
+            <div
+              role="tablist"
+              aria-label="Billing frequency selection"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/80 p-1.5 shadow-inner backdrop-blur-sm"
+            >
+              {billingOptions.map((option) => {
+                const isSelected = billing === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    role="tab"
+                    aria-selected={isSelected}
+                    onClick={() => setBilling(option.id)}
+                    className={cn(
+                      "relative flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:text-sm",
+                      isSelected
+                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span>{option.label}</span>
+                    {option.badge && (
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                          isSelected
+                            ? "bg-primary-foreground/20 text-primary-foreground"
+                            : "bg-accent-green/15 text-accent-green"
+                        )}
+                      >
+                        {option.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Global Mute Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleGlobalMute}
+              aria-label={isMuted ? "Unmute all personas" : "Mute all personas"}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:text-sm",
+                isMuted
+                  ? "border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
+                  : isSpeaking
+                  ? "border-primary/40 bg-primary/10 text-primary shadow-sm"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {isMuted ? (
+                <>
+                  <VolumeX className="size-4" />
+                  <span>Audio Muted</span>
+                </>
+              ) : (
+                <>
+                  <Volume2
+                    className={cn(
+                      "size-4",
+                      isSpeaking && "animate-pulse text-primary"
+                    )}
+                  />
+                  <span>{isSpeaking ? "Voice Playing" : "Mute Voice"}</span>
+                </>
+              )}
+            </button>
           </div>
+
           <p className="text-xs text-muted-foreground">
             {billing === "annual" ? (
               <span className="font-medium text-accent-green">
@@ -144,7 +399,7 @@ export function Pricing({
           </p>
         </div>
 
-        {/* Persona Pricing Cards Grid */}
+        {/* Minimal Persona Pricing Cards Grid (ONLY Character, Speech Bubble, Plan Name, Price, CTA) */}
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch">
           {personaPlans.map((plan, i) => (
             <PersonaCard
@@ -152,62 +407,49 @@ export function Pricing({
               plan={plan}
               billing={billing}
               index={i}
+              isSpeaking={activeSpeakerId === plan.id && isSpeaking}
+              analyser={analyser}
+              onTogglePlay={() => handleTogglePlay(plan)}
             />
           ))}
         </div>
-
-        {/* Enterprise Callout Banner */}
-        <Reveal className="mx-auto mt-14 max-w-4xl">
-          <div className="flex flex-col items-center justify-between gap-4 rounded-3xl border border-border bg-surface-alt/70 p-6 text-center sm:flex-row sm:text-left sm:p-8">
-            <div className="flex items-center gap-4">
-              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
-                <ShieldCheck className="size-6" />
-              </span>
-              <div>
-                <h4 className="font-heading text-lg font-bold">
-                  Franchise Academy or Custom ERP Integration?
-                </h4>
-                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                  We support custom white-label deployments, dedicated account managers, tailored accounting sync, and strict SLAs for enterprises.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/contact"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:bg-muted"
-            >
-              Contact Enterprise Team
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </Reveal>
       </div>
     </section>
   );
+}
+
+interface PersonaCardProps {
+  plan: PricingPersona;
+  billing: BillingPeriod;
+  index: number;
+  isSpeaking: boolean;
+  analyser: AnalyserNode | null;
+  onTogglePlay: () => void;
 }
 
 function PersonaCard({
   plan,
   billing,
   index,
-}: {
-  plan: PricingPersona;
-  billing: BillingPeriod;
-  index: number;
-}) {
+  isSpeaking,
+  analyser,
+  onTogglePlay,
+}: PersonaCardProps) {
+  const reduceMotion = useReducedMotion();
   const effectivePrice = calculateEffectiveMonthlyPrice(
     plan.monthlyPrice,
     billing
   );
   const hasDiscount = billing !== "monthly";
+  const isTalking = isSpeaking && !reduceMotion;
 
   return (
     <Reveal
       delay={index * 0.1}
       className={cn(
-        "relative flex h-full flex-col rounded-3xl border transition-all duration-300",
+        "group relative flex h-full flex-col rounded-3xl border transition-all duration-300",
         plan.highlight
-          ? "border-primary/50 bg-gradient-to-b from-primary/10 via-card to-card shadow-2xl shadow-primary/15 ring-2 ring-primary/20 lg:-translate-y-2 lg:scale-[1.02] z-10"
+          ? "border-primary/50 bg-gradient-to-b from-primary/10 via-card to-card shadow-2xl shadow-primary/15 ring-2 ring-primary/25 lg:-translate-y-2 lg:scale-[1.03] z-10"
           : "border-border bg-card hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-black/5"
       )}
     >
@@ -222,157 +464,318 @@ function PersonaCard({
       )}
 
       <div className="flex flex-1 flex-col p-6 sm:p-7">
-        {/* Tier Header & Pricing */}
-        <div className="border-b border-border/60 pb-5">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <h3 className="font-heading text-xl font-bold tracking-tight">
-                {plan.planName}
-              </h3>
-              <p className="mt-0.5 text-xs font-medium text-muted-foreground">
-                {plan.tierSubtitle}
-              </p>
-            </div>
-            <span
-              className={cn(
-                "rounded-full px-2.5 py-1 text-[11px] font-semibold",
-                plan.highlight
-                  ? "bg-primary/15 text-primary border border-primary/20"
-                  : "bg-muted text-muted-foreground"
-              )}
-            >
-              {plan.businessStage}
-            </span>
-          </div>
+        {/* 1. Plan Name & Persona Persona Header */}
+        <div className="text-center">
+          <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+            {plan.planName}
+          </h3>
+          <p className="mt-1 text-xs font-medium text-muted-foreground">
+            {plan.characterName} · {plan.characterRole}
+          </p>
+        </div>
 
-          <div className="mt-5 flex items-baseline gap-2">
+        {/* 2. Animated Speech Bubble with 1st-Person Spoken Message */}
+        <div className="relative mt-5">
+          <motion.div
+            layout
+            className={cn(
+              "relative rounded-2xl border p-4 shadow-sm transition-all duration-300",
+              isSpeaking
+                ? "border-primary/50 bg-primary/10 ring-2 ring-primary/20 shadow-md shadow-primary/10"
+                : "border-border/80 bg-muted/60 dark:bg-muted/30"
+            )}
+          >
+            {/* Speech Bubble Tail pointing down to the character */}
+            <div
+              className={cn(
+                "absolute -bottom-2.5 left-1/2 -translate-x-1/2 size-0 border-x-8 border-x-transparent border-t-8 transition-colors",
+                isSpeaking
+                  ? "border-t-primary/30"
+                  : "border-t-border/80 dark:border-t-muted"
+              )}
+            />
+
+            {/* Spoken Quote */}
+            <p className="text-xs italic leading-relaxed text-foreground sm:text-[13px]">
+              &ldquo;{plan.speechScript}&rdquo;
+            </p>
+
+            {/* Speak / Pause Interactive Controller */}
+            <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-2.5">
+              <button
+                type="button"
+                onClick={onTogglePlay}
+                aria-label={
+                  isSpeaking
+                    ? `Stop speech for ${plan.characterName}`
+                    : `Listen to ${plan.characterName} speak`
+                }
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                  isSpeaking
+                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90"
+                    : "bg-card border border-border text-foreground hover:bg-muted hover:border-primary/30"
+                )}
+              >
+                {isSpeaking ? (
+                  <>
+                    <Square className="size-3 fill-current" />
+                    <span>Stop Voice</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="size-3 fill-current" />
+                    <span>Hear {plan.characterName.split(" ")[0]} Speak</span>
+                  </>
+                )}
+              </button>
+
+              {/* Live Audio Waveform — real FFT bars for files, voice-reactive for speech */}
+              {isSpeaking && (
+                <AudioWaveVisualizer
+                  active={isSpeaking}
+                  analyser={analyser}
+                  bars={7}
+                  className="text-primary"
+                />
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* 3. The Character Image — PNG talks (bob, sway & sound rings) while speaking */}
+        <div className="relative my-4 flex flex-1 items-center justify-center">
+          {/* Expanding sound rings behind the character */}
+          {isTalking && (
+            <>
+              {[0, 1, 2].map((ring) => (
+                <motion.span
+                  key={ring}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-40 w-40 rounded-full border-2 border-primary/30 sm:h-44 sm:w-44"
+                  animate={{
+                    x: "-50%",
+                    y: "-50%",
+                    scale: [0.55, 1.9],
+                    opacity: [0.55, 0],
+                  }}
+                  transition={{
+                    duration: 1.9,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: ring * 0.62,
+                  }}
+                />
+              ))}
+            </>
+          )}
+
+          <div className="relative h-60 w-full sm:h-64">
+            {/* Talking motion: vertical bob + head sway + breath of the torso */}
+            <motion.div
+              className="relative h-full w-full"
+              animate={
+                isTalking
+                  ? {
+                      y: [0, -10, -4, -9, 0],
+                      rotate: [0, -1.5, 1, -0.8, 0],
+                      scale: [1, 1.06, 1.02, 1.05, 1],
+                    }
+                  : { y: 0, rotate: 0, scale: 1 }
+              }
+              transition={
+                isTalking
+                  ? { duration: 0.9, repeat: Infinity, ease: "easeInOut" }
+                  : { duration: 0.35, ease: "easeOut" }
+              }
+            >
+              <Image
+                src={plan.characterImage}
+                alt={plan.characterAlt}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
+                className={cn(
+                  "object-contain drop-shadow-md transition-transform duration-300",
+                  isSpeaking ? "drop-shadow-xl" : "group-hover:scale-102"
+                )}
+                priority={plan.highlight}
+              />
+            </motion.div>
+
+            {/* Speaking status chip with mini waveform */}
+            {isSpeaking && (
+              <motion.div
+                initial={{ opacity: 0, y: 6, x: "-50%" }}
+                animate={{ opacity: 1, y: 0, x: "-50%" }}
+                className="pointer-events-none absolute bottom-1 left-1/2 flex items-center gap-2 rounded-full border border-primary/30 bg-card/90 py-1 pl-2.5 pr-3 shadow-lg backdrop-blur-sm"
+              >
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
+                  Speaking
+                </span>
+                <AudioWaveVisualizer
+                  active={isSpeaking}
+                  analyser={analyser}
+                  bars={4}
+                  tall
+                  className="text-primary"
+                />
+              </motion.div>
+            )}
+          </div>
+        </div>
+
+        {/* 4. Price Display */}
+        <div className="border-t border-border/60 pt-4 text-center">
+          <div className="flex items-baseline justify-center gap-1.5">
             <span className="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
               ₹{effectivePrice.toLocaleString("en-IN")}
             </span>
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold text-muted-foreground">
-                /month
-              </span>
-              {hasDiscount && (
-                <span className="text-[11px] text-muted-foreground line-through">
-                  ₹{plan.monthlyPrice.toLocaleString("en-IN")}
-                </span>
-              )}
-            </div>
+            <span className="text-sm font-semibold text-muted-foreground">
+              /month
+            </span>
+          </div>
+
+          <div className="mt-1 flex items-center justify-center gap-2">
             {hasDiscount && (
-              <span className="ml-auto rounded-md bg-accent-green/15 px-2 py-0.5 text-[11px] font-bold text-accent-green">
+              <span className="text-xs text-muted-foreground line-through">
+                ₹{plan.monthlyPrice.toLocaleString("en-IN")}
+              </span>
+            )}
+            {hasDiscount && (
+              <span className="rounded-md bg-accent-green/15 px-2 py-0.5 text-[11px] font-bold text-accent-green">
                 Save {billing === "annual" ? "20%" : "10%"}
               </span>
             )}
+            {!hasDiscount && (
+              <span className="text-[11px] text-muted-foreground">
+                Billed monthly
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Persona Identity & Character Card */}
-        <div className="mt-6">
-          <div className="flex items-center gap-3.5">
-            <div className="relative size-14 shrink-0 overflow-hidden rounded-2xl border border-border bg-surface-alt shadow-sm">
-              <Image
-                src={plan.avatarImage}
-                alt={plan.avatarAlt}
-                width={80}
-                height={80}
-                className="h-full w-full object-cover object-top"
-              />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-foreground">
-                  {plan.personaName}
-                </span>
-                <span className="inline-block size-1.5 rounded-full bg-accent-green" />
-              </div>
-              <p className="truncate text-xs text-muted-foreground font-medium">
-                {plan.personaRole}
-              </p>
-            </div>
-          </div>
-
-          {/* Persona Speech Bubble (First-Person Voice) */}
-          <div className="relative mt-3.5">
-            {/* Bubble Tail */}
-            <div className="absolute -top-2 left-6 size-0 border-x-8 border-x-transparent border-b-8 border-b-muted/80 dark:border-b-muted" />
-            <div className="rounded-2xl border border-border/80 bg-muted/50 p-4 backdrop-blur-xs dark:bg-muted/30">
-              <div className="flex items-start gap-2">
-                <Quote className="mt-0.5 size-4 shrink-0 text-primary/70" />
-                <p className="text-xs italic leading-relaxed text-foreground/90 sm:text-[13px]">
-                  &ldquo;{plan.quote}&rdquo;
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* "For You If" Line */}
-        <div className="mt-6 rounded-xl border border-border/60 bg-surface-alt/60 p-3.5">
-          <div className="flex items-start gap-2">
-            <UserCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-            <p className="text-xs leading-relaxed text-foreground/90">
-              <strong className="font-semibold text-foreground">For you if: </strong>
-              {plan.forYouIf}
-            </p>
-          </div>
-        </div>
-
-        {/* Target Outcome Callout */}
-        <div className="mt-3 rounded-xl border border-accent-green/20 bg-accent-green/5 p-3.5">
-          <div className="flex items-start gap-2">
-            <TrendingUp className="mt-0.5 size-4 shrink-0 text-accent-green" />
-            <p className="text-xs font-medium leading-relaxed text-foreground">
-              <strong className="font-semibold text-accent-green">Target Outcome: </strong>
-              {plan.outcome}
-            </p>
-          </div>
-        </div>
-
-        {/* 3-4 Benefit-Based Differences (NO Modules Listed) */}
-        <div className="mt-6 flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            What transforms for your business:
-          </p>
-          <ul className="mt-3 space-y-2.5">
-            {plan.benefitDifferences.map((benefit, bIndex) => (
-              <li
-                key={bIndex}
-                className="flex items-start gap-2.5 text-xs leading-relaxed text-foreground/85 sm:text-[13px]"
-              >
-                <span
-                  className={cn(
-                    "mt-0.5 grid size-4 shrink-0 place-items-center rounded-full text-white shadow-xs",
-                    plan.highlight ? "bg-primary text-primary-foreground" : "bg-accent-green"
-                  )}
-                >
-                  <Check className="size-2.5 stroke-[3]" />
-                </span>
-                <span>{benefit}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* CTA Button */}
-        <div className="mt-8 pt-4">
+        {/* 5. CTA Button */}
+        <div className="mt-5">
           <Link
             href={plan.ctaHref}
             className={cn(
-              "group flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+              "group/btn flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
               plan.highlight
-                ? "bg-gradient-to-r from-primary via-accent-yellow to-primary bg-size-200 text-primary-foreground shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/35"
+                ? "bg-gradient-to-r from-primary via-accent-yellow to-primary text-primary-foreground shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/35"
                 : "border-2 border-border bg-card text-foreground hover:border-primary hover:bg-muted/50 hover:text-foreground"
             )}
           >
-            {plan.ctaText}
-            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+            <span>{plan.ctaText}</span>
+            <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
           </Link>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            Includes 20-day unrestricted trial · Cancel anytime
+            20-day full access · No card required
           </p>
         </div>
       </div>
     </Reveal>
+  );
+}
+
+interface AudioWaveVisualizerProps {
+  active: boolean;
+  analyser: AnalyserNode | null;
+  bars?: number;
+  tall?: boolean;
+  className?: string;
+}
+
+function AudioWaveVisualizer({
+  active,
+  analyser,
+  bars = 5,
+  tall = false,
+  className,
+}: AudioWaveVisualizerProps) {
+  const reduceMotion = useReducedMotion();
+  const [levels, setLevels] = useState<number[]>(() =>
+    Array(bars).fill(0.28)
+  );
+
+  useEffect(() => {
+    if (!active) {
+      setLevels(Array(bars).fill(0.28));
+      return;
+    }
+    if (reduceMotion) {
+      setLevels(Array(bars).fill(0.55));
+      return;
+    }
+
+    let raf = 0;
+    let last = 0;
+    let t = Math.random() * 100;
+    // Voice energy lives in the low-mid bins; skip the top (mostly noise)
+    const data = analyser
+      ? new Uint8Array(Math.floor(analyser.frequencyBinCount * 0.72))
+      : null;
+
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
+      if (now - last < 55) return; // ~18fps updates, CSS transitions smooth the rest
+      last = now;
+
+      const next = new Array<number>(bars).fill(0.3);
+
+      if (analyser && data) {
+        analyser.getByteFrequencyData(data);
+        for (let i = 0; i < bars; i++) {
+          const start = Math.floor((i / bars) * data.length);
+          const end = Math.max(start + 1, Math.floor(((i + 1) / bars) * data.length));
+          let sum = 0;
+          for (let j = start; j < end; j++) sum += data[j];
+          const avg = sum / (end - start) / 255;
+          next[i] = 0.18 + avg * 0.95;
+        }
+      } else {
+        // Web Speech API audio can't be tapped by an analyser, so synthesise
+        // a natural syllable-like envelope that rises and falls like a voice.
+        t += 0.26;
+        for (let i = 0; i < bars; i++) {
+          const syllable = (Math.sin(t * 1.9 + i * 0.7) + 1) / 2;
+          const carrier = (Math.sin(t + i * 1.35) + 1) / 2;
+          next[i] =
+            0.2 + syllable * 0.45 + carrier * 0.3 + Math.random() * 0.08;
+        }
+      }
+
+      setLevels((prev) =>
+        next.map((v, i) => prev[i] + (v - prev[i]) * 0.5)
+      );
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active, analyser, bars, reduceMotion]);
+
+  const maxHeight = tall ? 12 : 18;
+
+  return (
+    <div
+      role="img"
+      aria-label="Voice playing"
+      className={cn("flex h-5 items-end gap-[3px]", className)}
+    >
+      {levels.map((level, i) => (
+        <span
+          key={i}
+          aria-hidden="true"
+          className="w-1 rounded-full bg-current transition-[height,opacity] duration-150 ease-out"
+          style={{
+            height: `${Math.round(3 + level * maxHeight)}px`,
+            opacity: active ? 0.55 + level * 0.45 : 0.4,
+          }}
+        />
+      ))}
+    </div>
   );
 }
