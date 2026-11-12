@@ -34,40 +34,40 @@ export function SoloAgentCard({ plan, index = 0 }: SoloAgentCardProps) {
         onMouseLeave={handleMouseLeave}
         style={
           {
-            "--presenter-w": "clamp(116px, 35%, 172px)",
+            "--presenter-w": "clamp(155px, 42%, 215px)",
           } as React.CSSProperties
         }
         className={cn(
-          "group/solocard relative flex min-w-0 flex-1 flex-col rounded-[28px] border bg-card transition-all duration-300",
+          "group/solocard relative flex min-w-0 flex-1 flex-col rounded-[28px] border bg-card transition-all duration-300 min-h-[660px] sm:min-h-[700px] lg:min-h-[740px]",
           isHovered
             ? "border-primary/50 shadow-2xl shadow-primary/10 ring-1 ring-primary/30"
             : "border-border shadow-lg shadow-black/[0.04]"
         )}
       >
         {/*
-          Presenter: stands inside the card's lower-left lane, breaking the
-          left border slightly, facing the feature list and the ₹999 price.
-          Static standing pose by default; the presenting loop plays on hover.
-          The lane is reserved by the content's left padding, so the figure
-          never covers text, the price block or the CTA.
+          Presenter:
+          Placed right in the middle of the height (top-1/2 -translate-y-1/2).
+          Size increased to be large and prominent.
+          Static standing pose by default; presenting animation loop on hover.
+          Left padding preserves clear spacing so no content is ever overlapped.
         */}
         <div
           aria-hidden="true"
-          className="pointer-events-auto absolute left-0 top-1/2 z-20 -translate-x-[20%] -translate-y-1/2 select-none sm:-translate-x-[18%]"
+          className="pointer-events-auto absolute left-0 top-1/2 z-20 -translate-x-[22%] -translate-y-1/2 select-none sm:-translate-x-[20%] lg:-translate-x-[22%]"
           style={{
             width: "var(--presenter-w)",
-            aspectRatio: "210 / 400",
+            aspectRatio: "201 / 396",
           }}
         >
           <div className="relative h-full w-full">
             {/* Grounded contact shadow under the shoes */}
-            <div className="pointer-events-none absolute -bottom-1 left-1/2 h-3 w-24 -translate-x-1/2 rounded-full bg-black/15 blur-md dark:bg-black/30" />
+            <div className="pointer-events-none absolute -bottom-1 left-1/2 h-3.5 w-28 -translate-x-1/2 rounded-full bg-black/20 blur-md dark:bg-black/40" />
 
             {/* Ambient spotlight behind the presenter */}
             <div
               className={cn(
-                "pointer-events-none absolute -inset-8 -z-10 rounded-full bg-primary/15 blur-2xl transition-opacity duration-500",
-                isHovered ? "opacity-100" : "opacity-30"
+                "pointer-events-none absolute -inset-8 -z-10 rounded-full bg-primary/20 blur-2xl transition-opacity duration-500",
+                isHovered ? "opacity-100" : "opacity-35"
               )}
             />
 
@@ -82,11 +82,11 @@ export function SoloAgentCard({ plan, index = 0 }: SoloAgentCardProps) {
             >
               {/* Layer 1: static standing pose */}
               <img
-                src="/assert/solo-still.png"
-                alt=""
+                src="/assert/solo-agent-still.png"
+                alt="Karthik Sundaram - Solo Plan Presenter"
                 draggable={false}
                 className={cn(
-                  "pointer-events-none absolute inset-0 h-full w-full object-contain object-bottom drop-shadow-xl transition-opacity duration-300 ease-out",
+                  "pointer-events-none absolute inset-0 h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity duration-300 ease-out",
                   isHovered ? "opacity-0" : "opacity-100"
                 )}
               />
@@ -94,12 +94,12 @@ export function SoloAgentCard({ plan, index = 0 }: SoloAgentCardProps) {
               {/* Layer 2: presenting animation */}
               <img
                 key={animKey}
-                src="/assert/solo.gif"
+                src="/assert/solo-agent.gif"
                 alt=""
                 aria-hidden="true"
                 draggable={false}
                 className={cn(
-                  "pointer-events-none absolute inset-0 h-full w-full object-contain object-bottom drop-shadow-xl transition-opacity duration-300 ease-out",
+                  "pointer-events-none absolute inset-0 h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity duration-300 ease-out",
                   isHovered ? "opacity-100" : "opacity-0"
                 )}
               />
@@ -110,7 +110,7 @@ export function SoloAgentCard({ plan, index = 0 }: SoloAgentCardProps) {
         <div
           className="flex flex-1 flex-col p-5 sm:p-6"
           style={{
-            paddingLeft: "calc(var(--presenter-w) * 0.8 + 12px)",
+            paddingLeft: "calc(var(--presenter-w) * 0.78 + 14px)",
           }}
         >
           {/* Header */}

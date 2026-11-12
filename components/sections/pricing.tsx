@@ -10,6 +10,7 @@ import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
 import { personaPlans, type PricingPersona } from "@/data/pricing";
 import { SoloAgentCard } from "@/components/sections/solo-agent-card";
+import { ScaleAgentCard } from "@/components/sections/scale-agent-card";
 
 /* -------------------------------------------------------------------------- */
 /*  Per-card staging: where the persona stands. Order follows `personaPlans`. */
@@ -81,13 +82,15 @@ export function Pricing({
 
         {/* The relay. pt-44 is the headroom the personas rise into. */}
         <div className="flex flex-col gap-40 pt-44 sm:gap-44 lg:flex-row lg:gap-6 lg:pt-48 lg:pl-10 xl:pl-12">
-          {plans.map((plan, i) =>
-            plan.id === "solo" ? (
-              <SoloAgentCard key={plan.id} plan={plan} index={i} />
-            ) : (
-              <AgentCard key={plan.id} plan={plan} index={i} />
-            )
-          )}
+          {plans.map((plan, i) => {
+            if (plan.id === "solo") {
+              return <SoloAgentCard key={plan.id} plan={plan} index={i} />;
+            }
+            if (plan.id === "complete") {
+              return <ScaleAgentCard key={plan.id} plan={plan} index={i} />;
+            }
+            return <AgentCard key={plan.id} plan={plan} index={i} />;
+          })}
         </div>
       </div>
     </section>
@@ -147,23 +150,15 @@ interface AgentCardProps {
 function AgentCard({ plan, index }: AgentCardProps) {
   const { stage, side } =
     STAGING[index] ?? STAGING[STAGING.length - 1];
-  // Centre card (Business): presenter stands at the top centre.
-  // Third card (Scale): the businessman stands at the bottom of the card.
-  const hasTopPersona = plan.id === "business";
-  const hasBottomPersona = plan.id === "complete";
-  const hasAnimatedPersona = hasTopPersona || hasBottomPersona;
   const [isHovered, setIsHovered] = useState(false);
   const [animKey, setAnimKey] = useState(0);
 
   const handleMouseEnter = () => {
-    if (!hasAnimatedPersona) return;
     setIsHovered(true);
-    // Remount the GIF so its cycle restarts from the first frame.
     setAnimKey((prev) => prev + 1);
   };
 
   const handleMouseLeave = () => {
-    if (!hasAnimatedPersona) return;
     setIsHovered(false);
   };
 
@@ -179,13 +174,11 @@ function AgentCard({ plan, index }: AgentCardProps) {
             : "border-border shadow-lg shadow-black/[0.04]"
         )}
       >
-      {/*
-        Persona: stands mostly OUTSIDE the card, overlapping the top edge.
-        Each card stages it differently: right, left, or centered.
-        About 70% of the figure is above the card; the lower part fades in.
-        Mobile: -top-36 h-52 | sm and up: -top-[10.5rem] h-60
-      */}
-      {!hasBottomPersona && (
+        {/*
+          Persona: stands mostly OUTSIDE the card, overlapping the top edge.
+          About 70% of the figure is above the card; the lower part fades in.
+          Mobile: -top-36 h-52 | sm and up: -top-[10.5rem] h-60
+        */}
         <div
           aria-hidden="true"
           className={cn(
@@ -196,202 +189,136 @@ function AgentCard({ plan, index }: AgentCardProps) {
           )}
         >
           <div className="flex h-full w-full items-end justify-center">
-            {hasTopPersona ? (
-              <motion.div
-                animate={{
-                  scale: isHovered ? 1.04 : 1,
-                  y: isHovered ? -4 : 0,
-                }}
-                transition={{ type: "spring", stiffness: 240, damping: 20 }}
-                className="relative h-full w-full"
-              >
-                {/* Idle pose */}
-                <img
-                  src="/assert/business-agent-still.png"
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  className={cn(
-                    "pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-bottom drop-shadow-xl transition-opacity duration-300 ease-out [mask-image:linear-gradient(to_bottom,black_72%,transparent)]",
-                    isHovered ? "opacity-0" : "opacity-100"
-                  )}
-                />
-                {/* Presenting animation */}
-                <img
-                  key={animKey}
-                  src="/assert/business-agent.gif"
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  className={cn(
-                    "pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-bottom drop-shadow-xl transition-opacity duration-300 ease-out [mask-image:linear-gradient(to_bottom,black_72%,transparent)]",
-                    isHovered ? "opacity-100" : "opacity-0"
-                  )}
-                />
-              </motion.div>
-            ) : (
-              <PersonaAvatar
-                planId={plan.id}
-                className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
+            <motion.div
+              animate={{
+                scale: isHovered ? 1.04 : 1,
+                y: isHovered ? -4 : 0,
+              }}
+              transition={{ type: "spring", stiffness: 240, damping: 20 }}
+              className="relative h-full w-full"
+            >
+              {/* Idle pose */}
+              <img
+                src="/assert/business-agent-still.png"
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                className={cn(
+                  "pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-bottom drop-shadow-xl transition-opacity duration-300 ease-out [mask-image:linear-gradient(to_bottom,black_72%,transparent)]",
+                  isHovered ? "opacity-0" : "opacity-100"
+                )}
               />
-            )}
+              {/* Presenting animation */}
+              <img
+                key={animKey}
+                src="/assert/business-agent.gif"
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                className={cn(
+                  "pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-bottom drop-shadow-xl transition-opacity duration-300 ease-out [mask-image:linear-gradient(to_bottom,black_72%,transparent)]",
+                  isHovered ? "opacity-100" : "opacity-0"
+                )}
+              />
+            </motion.div>
           </div>
         </div>
-      )}
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
-        {/* Header: always clear of the persona */}
-        <div
-          className={cn(
-            side === "center"
-              ? cn(
-                  "flex flex-col items-center text-center",
-                  hasBottomPersona ? "pt-2 sm:pt-3" : "pt-14 sm:pt-16"
-                )
-              : "min-h-[6.5rem] w-[50%] sm:min-h-[7rem]",
-            side === "left" && "ml-auto"
-          )}
-        >
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-foreground/80">
-            <span className="size-1.5 rounded-full bg-primary" />
-            {stage}
-          </span>
-          <h3 className="mt-2 font-heading text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
-            {plan.planName}
-          </h3>
-          <p className="mt-1 text-xs font-medium leading-snug text-muted-foreground">
-            {plan.characterName}
-            <span className="block">{plan.characterRole}</span>
-          </p>
-        </div>
+        <div className="flex flex-1 flex-col p-5 sm:p-6">
+          {/* Header: always clear of the persona */}
+          <div
+            className={cn(
+              side === "center"
+                ? "flex flex-col items-center pt-14 text-center sm:pt-16"
+                : "min-h-[6.5rem] w-[50%] sm:min-h-[7rem]",
+              side === "left" && "ml-auto"
+            )}
+          >
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-foreground/80">
+              <span className="size-1.5 rounded-full bg-primary" />
+              {stage}
+            </span>
+            <h3 className="mt-2 font-heading text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
+              {plan.planName}
+            </h3>
+            <p className="mt-1 text-xs font-medium leading-snug text-muted-foreground">
+              {plan.characterName}
+              <span className="block">{plan.characterRole}</span>
+            </p>
+          </div>
 
-        {/* Feature menu cards: fully visible and static */}
-        <div className="mt-4 flex-1">
-          <p className="mb-2 text-xs font-semibold text-foreground/80">
-            What you get
-          </p>
+          {/* Feature menu cards: fully visible and static */}
+          <div className="mt-4 flex-1">
+            <p className="mb-2 text-xs font-semibold text-foreground/80">
+              What you get
+            </p>
 
-          <ul className="space-y-1.5">
-            {plan.features.map((feature) => {
-              if (feature.startsWith("Everything in")) {
+            <ul className="space-y-1.5">
+              {plan.features.map((feature) => {
+                if (feature.startsWith("Everything in")) {
+                  return (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-2 pb-0.5 pt-1.5 text-xs font-semibold text-muted-foreground"
+                    >
+                      <span className="h-px flex-1 bg-border" />
+                      {feature}
+                      <span className="h-px flex-1 bg-border" />
+                    </li>
+                  );
+                }
+
                 return (
                   <li
                     key={feature}
-                    className="flex items-center gap-2 pb-0.5 pt-1.5 text-xs font-semibold text-muted-foreground"
+                    className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-background/50 px-3 py-2 text-xs font-medium leading-snug text-foreground/85"
                   >
-                    <span className="h-px flex-1 bg-border" />
-                    {feature}
-                    <span className="h-px flex-1 bg-border" />
+                    <span className="mt-px grid size-4 shrink-0 place-items-center rounded-full bg-accent-green/15 text-accent-green">
+                      <Check
+                        className="size-2.5"
+                        strokeWidth={3.5}
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <span>{feature}</span>
                   </li>
                 );
-              }
-
-              return (
-                <li
-                  key={feature}
-                  className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-background/50 px-3 py-2 text-xs font-medium leading-snug text-foreground/85"
-                >
-                  <span className="mt-px grid size-4 shrink-0 place-items-center rounded-full bg-accent-green/15 text-accent-green">
-                    <Check
-                      className="size-2.5"
-                      strokeWidth={3.5}
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <span>{feature}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-        {/* Price: original price only */}
-        <div className="mt-5 flex items-baseline justify-center gap-1.5 border-t border-border/60 pt-5">
-          <span className="font-heading text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
-            ₹{plan.monthlyPrice.toLocaleString("en-IN")}
-          </span>
-          <span className="text-sm font-semibold text-muted-foreground">
-            /month
-          </span>
-        </div>
-
-        {/* Third card: businessman with crossed arms, standing at the bottom */}
-        {hasBottomPersona && (
-          <div className="mt-3 flex justify-center">
-            <div className="relative">
-              {/* Ambient glow behind the presenter */}
-              <div
-                aria-hidden="true"
-                className={cn(
-                  "pointer-events-none absolute -inset-8 -z-10 rounded-full bg-primary/15 blur-2xl transition-opacity duration-500",
-                  isHovered ? "opacity-100" : "opacity-30"
-                )}
-              />
-
-              <motion.div
-                animate={{
-                  scale: isHovered ? 1.05 : 1,
-                  y: isHovered ? -4 : 0,
-                }}
-                transition={{ type: "spring", stiffness: 240, damping: 20 }}
-                className="relative"
-              >
-                {/* Idle pose */}
-                <img
-                  src="/assert/businessman-crossing-arms-still.png"
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  className={cn(
-                    "pointer-events-none block h-28 w-auto select-none object-contain object-bottom drop-shadow-lg transition-opacity duration-300 ease-out sm:h-32",
-                    isHovered ? "opacity-0" : "opacity-100"
-                  )}
-                />
-                {/* Presenting animation */}
-                <img
-                  key={animKey}
-                  src="/assert/businessman-crossing-arms.gif"
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  className={cn(
-                    "pointer-events-none absolute inset-0 block h-28 w-auto select-none object-contain object-bottom drop-shadow-lg transition-opacity duration-300 ease-out sm:h-32",
-                    isHovered ? "opacity-100" : "opacity-0"
-                  )}
-                />
-              </motion.div>
-
-              {/* Contact shadow */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -bottom-1 left-1/2 h-2.5 w-16 -translate-x-1/2 rounded-full bg-black/15 blur-md dark:bg-black/30"
-              />
-            </div>
+              })}
+            </ul>
           </div>
-        )}
 
-        {/* CTA */}
-        <div className="mt-5">
-          <Link
-            href={plan.ctaHref}
-            className={cn(
-              "group/btn flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-              plan.highlight
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/35"
-                : "border-2 border-border bg-card text-foreground hover:border-primary hover:bg-muted/50"
-            )}
-          >
-            <span>{plan.ctaText}</span>
-            <ArrowRight
-              className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1"
-              aria-hidden="true"
-            />
-          </Link>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            20-day full access, no card required
-          </p>
+          {/* Price: original price only */}
+          <div className="mt-5 flex items-baseline justify-center gap-1.5 border-t border-border/60 pt-5">
+            <span className="font-heading text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
+              ₹{plan.monthlyPrice.toLocaleString("en-IN")}
+            </span>
+            <span className="text-sm font-semibold text-muted-foreground">
+              /month
+            </span>
+          </div>
+
+          {/* CTA */}
+          <div className="mt-5">
+            <Link
+              href={plan.ctaHref}
+              className={cn(
+                "group/btn flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                plan.highlight
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/35"
+                  : "border-2 border-border bg-card text-foreground hover:border-primary hover:bg-muted/50"
+              )}
+            >
+              <span>{plan.ctaText}</span>
+              <ArrowRight
+                className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1"
+                aria-hidden="true"
+              />
+            </Link>
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">
+              20-day full access, no card required
+            </p>
+          </div>
         </div>
-      </div>
       </motion.div>
     </Reveal>
   );
