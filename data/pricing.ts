@@ -8,20 +8,11 @@ export interface BillingOption {
   savingsLabel?: string;
 }
 
-export interface VoiceConfig {
-  rate: number;
-  pitch: number;
-  lang: string;
-}
-
 export interface PricingPersona {
   id: string;
   planName: string;
   characterName: string;
   characterRole: string;
-  speechScript: string; // Spoken first-person message
-  audioFile?: string; // Optional audio file from public/audio/
-  voiceConfig: VoiceConfig;
   features: string[]; // Package contents shown on the card
   monthlyPrice: number;
   highlight: boolean;
@@ -58,14 +49,6 @@ export const personaPlans: PricingPersona[] = [
     planName: "Solo Plan",
     characterName: "Karthik Sundaram",
     characterRole: "Solo Academy & Studio Owner",
-    speechScript:
-      "Hey there! Before 1Grow, I was losing two hours every night chasing fee dues on WhatsApp and updating messy notebooks. With the Solo plan, payment reminders go out automatically, attendance takes two taps on my phone, and I finally got my evenings back. If you run your counter solo, this is made for you!",
-    audioFile: "/audio/solo.mp3",
-    voiceConfig: {
-      rate: 0.98,
-      pitch: 1.0,
-      lang: "en-IN",
-    },
     features: [
       "Any one module: Training, Rental or Events",
       "Lead & Customer Management",
@@ -85,14 +68,6 @@ export const personaPlans: PricingPersona[] = [
     planName: "Business Plan",
     characterName: "Ananya Krishnan",
     characterRole: "Multi-Branch Managing Director",
-    speechScript:
-      "Hi! When we scaled to three locations, miscommunication and double-booked inventory almost broke our business. The Business plan gave my branch managers role-based autonomy while giving me a live bird's-eye view of every location's revenue and operations. It keeps our entire team synchronized without micromanagement.",
-    audioFile: "/audio/business.mp3",
-    voiceConfig: {
-      rate: 0.96,
-      pitch: 1.1,
-      lang: "en-IN",
-    },
     features: [
       "Any two modules: Training, Rental or Events",
       "Everything in Solo, plus:",
@@ -113,14 +88,6 @@ export const personaPlans: PricingPersona[] = [
     planName: "Scale Plan",
     characterName: "Vikramaditya Sengupta",
     characterRole: "Multi-Service Enterprise CEO",
-    speechScript:
-      "Hello! We operate multi-city academies, corporate event teams, and extensive rental fleets. We couldn't afford disconnected tools or artificial record limits. This plan runs our entire company end-to-end with predictive AI revenue forecasting and automated lead follow-ups that close high-ticket clients before competitors reply.",
-    audioFile: "/audio/complete.mp3",
-    voiceConfig: {
-      rate: 0.95,
-      pitch: 0.9,
-      lang: "en-IN",
-    },
     features: [
       "All modules: Training, Rental & Events",
       "Everything in Business, plus:",
