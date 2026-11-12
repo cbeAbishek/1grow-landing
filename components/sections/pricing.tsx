@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ArrowRight, Check, Zap } from "lucide-react";
 import { PersonaAvatar } from "@/components/persona/persona-avatar";
 import { SectionHeading } from "@/components/section-heading";
@@ -15,7 +16,7 @@ import { personaPlans, type PricingPersona } from "@/data/pricing";
 type Side = "right" | "left" | "center";
 
 const STAGING: { stage: string; side: Side }[] = [
-  { stage: "Capture", side: "right" },
+  { stage: "Capture", side: "center" },
   { stage: "Run", side: "left" },
   { stage: "Grow", side: "center" },
 ];
@@ -167,10 +168,29 @@ function AgentCard({ plan, index }: AgentCardProps) {
         )}
       >
         <div className="flex h-full w-full items-end justify-center">
-          <PersonaAvatar
-            planId={plan.id}
-            className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
-          />
+          {plan.id === "solo" ? (
+            <motion.div
+              initial={{ y: 0, scale: 1 }}
+              animate={{ y: 0, scale: 1 }}
+              whileHover={{ y: -14, scale: 1.06 }}
+              transition={{ type: "spring", stiffness: 220, damping: 18 }}
+              style={{ aspectRatio: "431 / 405", height: "100%" }}
+              className="relative pointer-events-auto w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
+            >
+              <img
+                src="/assert/Animated1.gif"
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-bottom"
+              />
+            </motion.div>
+          ) : (
+            <PersonaAvatar
+              planId={plan.id}
+              className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-xl [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
+            />
+          )}
         </div>
       </div>
 
