@@ -94,7 +94,7 @@ export function SoloAgentCard({ plan, index = 0 }: SoloAgentCardProps) {
               {/* Layer 2: presenting animation */}
               <img
                 key={animKey}
-                src="/assert/solo-agent.gif"
+                src={isHovered ? `/assert/solo-agent.gif?v=${animKey}` : "/assert/solo-agent-still.png"}
                 alt=""
                 aria-hidden="true"
                 draggable={false}

@@ -94,7 +94,7 @@ export function ScaleAgentCard({ plan, index = 2 }: ScaleAgentCardProps) {
               {/* Crossing arms animation GIF */}
               <img
                 key={animKey}
-                src="/assert/businessman-crossing-arms.gif"
+                src={isHovered ? `/assert/businessman-crossing-arms.gif?v=${animKey}` : "/assert/businessman-crossing-arms-still.png"}
                 alt=""
                 aria-hidden="true"
                 draggable={false}

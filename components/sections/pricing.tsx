@@ -181,8 +181,10 @@ function AgentCard({ plan, index }: AgentCardProps) {
         */}
         <div
           aria-hidden="true"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className={cn(
-            "pointer-events-none absolute -top-36 z-20 flex h-52 items-end sm:-top-[10.5rem] sm:h-60",
+            "pointer-events-auto absolute -top-36 z-20 flex h-52 items-end sm:-top-[10.5rem] sm:h-60",
             side === "right" && "right-2 w-[48%] justify-end sm:right-3",
             side === "left" && "left-2 w-[48%] justify-start sm:left-3",
             side === "center" && "left-1/2 w-[62%] -translate-x-1/2 justify-center"
@@ -211,7 +213,7 @@ function AgentCard({ plan, index }: AgentCardProps) {
               {/* Presenting animation */}
               <img
                 key={animKey}
-                src="/assert/business-agent.gif"
+                src={isHovered ? `/assert/business-agent.gif?v=${animKey}` : "/assert/business-agent-still.png"}
                 alt=""
                 aria-hidden="true"
                 draggable={false}
