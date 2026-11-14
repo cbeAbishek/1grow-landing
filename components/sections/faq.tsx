@@ -1,129 +1,125 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { SectionHeading } from "@/components/section-heading";
-import { Reveal } from "@/components/reveal";
-import Link from "next/link";
+'use client'
 
-const faqs = [
-  {
-    q: "Can I use only one module?",
-    a: "Absolutely. Start with just Training, Rental, or Event management and pay only for what you use. You can add more modules anytime as your business grows. Each module works independently yet integrates seamlessly with billing, CRM, and analytics.",
-    link: "/features",
-    linkText: "Explore all features",
-  },
-  {
-    q: "Is there a free trial?",
-    a: "Yes - every plan starts with a 20-day free trial that includes full access to all modules. No credit card is required to get started. Experience the complete platform before making any commitment.",
-    link: "/pricing",
-    linkText: "View pricing plans",
-  },
-  {
-    q: "Can I manage multiple branches?",
-    a: "Yes. Multi-branch operations are built into the platform. Manage locations, staff rosters, and inventory across branches from a single dashboard while owners get a consolidated view of the entire business. Compare branch performance side by side.",
-  },
-  {
-    q: "Do you support mobile devices?",
-    a: "1Grow is mobile-first and fully responsive. Your team can manage attendance, bookings, payments, and tasks from any smartphone, tablet, or desktop computer. The mobile experience includes all core features.",
-    link: "/features/mobile-app",
-    linkText: "Learn about the mobile app",
-  },
-  {
-    q: "Is my data secure?",
-    a: "Your data is protected with enterprise-grade security including role-based access control, comprehensive audit logs, encryption at rest and in transit, and true multi-tenant isolation so each business stays completely separate and private.",
-    link: "/features/multi-tenant-architecture",
-    linkText: "Learn about our security",
-  },
-  {
-    q: "How does fee collection work?",
-    a: "The platform automates fee collection with WhatsApp payment links, email reminders, and SMS notifications. Students and parents receive payment requests automatically, and receipts are generated instantly upon payment confirmation.",
-    link: "/features/fee-collection",
-    linkText: "See fee collection features",
-  },
-  {
-    q: "Can I integrate WhatsApp for notifications?",
-    a: "Yes. WhatsApp Business API integration is built in. Send attendance updates, fee reminders, class schedule changes, and promotional messages automatically. Template messages comply with WhatsApp business policies.",
-    link: "/features/whatsapp-notifications",
-    linkText: "Explore WhatsApp integration",
-  },
-  {
-    q: "What industries does 1Grow serve?",
-    a: "1Grow is built for three key industries: Training Institutes (music schools, dance studios, tuition centers, coaching classes), Rental Businesses (equipment, vehicles, venues, party supplies), and Event Companies (wedding planners, corporate events, cultural programs). Each industry gets tailored workflows and features.",
-    link: "/solutions",
-    linkText: "View industry solutions",
-  },
-  {
-    q: "How much does 1Grow cost?",
-    a: "1Grow offers transparent pricing starting at ₹999/month for the Starter plan. The Business plan at ₹1,899/month includes all modules and priority support. Enterprise plans with custom features are available on request. All plans include a 20-day free trial.",
-    link: "/pricing",
-    linkText: "See detailed pricing",
-  },
-  {
-    q: "Can I migrate from my existing software?",
-    a: "Yes. 1Grow supports data import from Excel/CSV files and can integrate with your existing tools. Our onboarding team provides free data migration assistance to ensure a smooth transition with zero data loss.",
-    link: "/tutorials",
-    linkText: "Check migration tutorials",
-  },
-  {
-    q: "Does 1Grow support multiple languages?",
-    a: "Yes. 1Grow supports English, Tamil, and Hindi. Your team and customers can use the platform in their preferred language. Additional languages are planned for future releases.",
-  },
-  {
-    q: "How does 1Grow compare to using WhatsApp and Excel?",
-    a: "WhatsApp and Excel are not built for business operations. With 1Grow, you get automated fee reminders, real-time inventory tracking, attendance management, and live analytics reports. No manual data entry, no lost messages, and everything is centralized in one dashboard.",
-    link: "/blog/save-10-hours-weekly-single-erp",
-    linkText: "Read how businesses save 10+ hours weekly",
-  },
-  {
-    q: "Can I try 1Grow before paying?",
-    a: "Yes. Start with a 20-day free trial. You get full access to every feature. Invite your team. Import your data. If it works for you, choose a plan. If not, no charge.",
-  },
-];
+import React, { useState } from 'react'
+import Link from 'next/link'
+import { ChevronDown, MessageSquare, ArrowRight } from 'lucide-react'
+import { Container } from '@/components/layout/container'
+import { Reveal } from '@/components/motion/reveal'
+import { WaveDivider } from '@/components/layout/wave-divider'
+import { faqs } from '@/content/landing'
+import { cn } from '@/lib/utils'
 
 export function Faq() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
+
+  const toggle = (idx: number) => {
+    setOpenIndex((prev) => (prev === idx ? null : idx))
+  }
+
   return (
     <section
       id="faq"
+      data-band="tint"
       aria-labelledby="faq-heading"
-      className="scroll-mt-24 px-4 py-24"
+      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg-tint)]"
     >
-      <div className="mx-auto max-w-3xl">
-        <SectionHeading
-          eyebrow="FAQ"
-          title="Questions, answered"
-          description="Everything you need to know about 1Grow before getting started."
-        />
+      <Container>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Left Column: Sticky Heading Block */}
+          <div className="lg:col-span-5 lg:sticky lg:top-28">
+            <span className="eyebrow inline-flex items-center gap-2 font-body text-sm font-bold uppercase tracking-wider text-[var(--primary)] bg-[var(--cloud-tint)] px-4 py-1.5 rounded-full border border-[var(--accent-orange-200)] mb-4">
+              FAQ
+            </span>
+            <h2
+              id="faq-heading"
+              className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--heading)] leading-tight text-balance"
+            >
+              Frequently asked questions
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-[var(--ink-2)] leading-relaxed">
+              Everything you need to know about 1Grow before getting started. Can&apos;t find what you&apos;re looking for?
+            </p>
 
-        <Reveal className="mt-12">
-          <Accordion type="single" className="w-full">
-            {faqs.map((faq, i) => (
-              <AccordionItem
-                key={i}
-                value={`item-${i}`}
-                className="mb-3 rounded-2xl border border-border bg-card px-5 transition-all data-[state=open]:border-primary/30 data-[state=open]:shadow-md data-[state=open]:shadow-primary/5"
+            <div className="mt-8 pt-6 border-t border-line/70">
+              <p className="text-base font-bold text-[var(--heading)] mb-2">Have a specific question?</p>
+              <a
+                href="https://wa.me/919566372450"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-arrow text-base font-semibold text-[var(--primary)]"
               >
-                <AccordionTrigger className="text-left font-heading text-base font-semibold hover:no-underline">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
-                  <p>{faq.a}</p>
-                  {faq.link && faq.linkText && (
-                    <Link
-                      href={faq.link}
-                      className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                <MessageSquare className="size-4 mr-1 text-[var(--success)]" />
+                Still stuck? Chat with us on WhatsApp &rarr;
+              </a>
+            </div>
+          </div>
+
+          {/* Right Column: Salesforce Style Accordion List (§6, §7.16) */}
+          <div className="lg:col-span-7">
+            <Reveal direction="scale">
+              <div className="rounded-[28px] border border-line bg-[var(--surface)] shadow-[var(--shadow-2)] overflow-hidden divide-y divide-line">
+                {faqs.map((faq, i) => {
+                  const isOpen = openIndex === i
+                  return (
+                    <div
+                      key={faq.question}
+                      className={cn(
+                        'relative transition-colors duration-200',
+                        isOpen ? 'bg-[var(--surface)]' : 'hover:bg-[var(--cloud-tint)]',
+                      )}
                     >
-                      {faq.linkText} &rarr;
-                    </Link>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </Reveal>
+                      {/* Left 4px Accent Bar on Open */}
+                      {isOpen && (
+                        <span className="absolute left-0 top-0 bottom-0 w-[4px] bg-[var(--primary)]" />
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => toggle(i)}
+                        className="flex w-full items-center justify-between gap-4 p-6 sm:p-7 text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--primary)] group"
+                        aria-expanded={isOpen}
+                        aria-controls={`faq-answer-${i}`}
+                      >
+                        <span
+                          className={cn(
+                            'font-display text-lg sm:text-xl font-bold transition-colors duration-150 pr-4',
+                            isOpen
+                              ? 'text-[var(--primary)]'
+                              : 'text-[var(--heading)] group-hover:text-[var(--primary)]',
+                          )}
+                        >
+                          {faq.question}
+                        </span>
+                        <ChevronDown
+                          className={cn(
+                            'size-5 shrink-0 text-[var(--ink-3)] transition-transform duration-250',
+                            isOpen && 'rotate-180 text-[var(--primary)]',
+                          )}
+                          aria-hidden="true"
+                        />
+                      </button>
+
+                      {isOpen && (
+                        <div
+                          id={`faq-answer-${i}`}
+                          className="px-6 pb-6 sm:px-7 sm:pb-7 text-base text-[var(--ink-2)] leading-relaxed border-t border-line/40 pt-4"
+                        >
+                          {faq.answer}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </Container>
+
+      {/* Wave ending transitioning into Dark Final CTA (§4) */}
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
+        <WaveDivider to="dark" shape="B" />
       </div>
     </section>
-  );
+  )
 }

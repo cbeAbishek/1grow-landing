@@ -1,60 +1,174 @@
-import { Reveal } from '@/components/reveal'
-import { GraduationCap, Package, PartyPopper, Music, Waves, Swords, Camera, Heart, Clapperboard } from 'lucide-react'
+'use client'
 
-const industries = [
-  { icon: GraduationCap, name: 'Dance Academy', color: 'bg-primary/10 text-primary border-primary/15' },
-  { icon: Music, name: 'Music School', color: 'bg-accent-blue/10 text-accent-blue border-accent-blue/15' },
-  { icon: Waves, name: 'Swimming Academy', color: 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/15' },
-  { icon: Swords, name: 'Martial Arts', color: 'bg-accent-red/10 text-accent-red border-accent-red/15' },
-  { icon: Heart, name: 'Yoga Studio', color: 'bg-accent-green/10 text-accent-green border-accent-green/15' },
-  { icon: GraduationCap, name: 'Tuition Centre', color: 'bg-primary/10 text-primary border-primary/15' },
-  { icon: Package, name: 'Rental Business', color: 'bg-accent-blue/10 text-accent-blue border-accent-blue/15' },
-  { icon: PartyPopper, name: 'Event Company', color: 'bg-accent-red/10 text-accent-red border-accent-red/15' },
-  { icon: Heart, name: 'Wedding Planner', color: 'bg-primary/10 text-primary border-primary/15' },
-  { icon: Camera, name: 'Photography Studio', color: 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/15' },
+import React, { useState } from 'react'
+import Link from 'next/link'
+import {
+  GraduationCap,
+  Music,
+  Waves,
+  Swords,
+  Heart,
+  BookOpen,
+  Package,
+  PartyPopper,
+  CalendarHeart,
+  Camera,
+  ArrowRight,
+} from 'lucide-react'
+import { Container } from '@/components/layout/container'
+import { SectionHead } from '@/components/layout/section-head'
+import { Reveal } from '@/components/motion/reveal'
+import { WaveDivider } from '@/components/layout/wave-divider'
+import { industries } from '@/content/landing'
+import { cn } from '@/lib/utils'
+
+const iconMap: Record<string, React.ElementType> = {
+  GraduationCap,
+  Music,
+  Waves,
+  Swords,
+  Heart,
+  BookOpen,
+  Package,
+  PartyPopper,
+  CalendarHeart,
+  Camera,
+}
+
+const accentCycles = [
+  'card-accent-blue',
+  'card-accent-orange',
+  'card-accent-coral',
+  'card-accent-teal',
+  'card-accent-green',
+  'card-accent-purple',
 ]
 
+type CategoryFilter = 'all' | 'training' | 'rental' | 'event'
+
 export function WhoIsThisFor() {
+  const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all')
+
+  const filteredIndustries =
+    activeFilter === 'all'
+      ? industries
+      : industries.filter((ind) => ind.category === activeFilter)
+
   return (
     <section
       id="industries"
+      data-band="light"
       aria-labelledby="industries-heading"
-      className="scroll-mt-24 px-4 py-24"
+      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg)]"
     >
-      <div className="mx-auto max-w-6xl">
-        <Reveal className="text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
-            Industry Solutions
-          </span>
-          <h2
-            id="industries-heading"
-            className="mt-5 text-balance font-heading text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
-          >
-            Built for your industry
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            1Grow works for training academies, rental firms, and event planners across India. 
-            Each industry gets custom workflows, reports, and tools designed for your business type. 
-            <strong className="text-foreground">Pick your industry below to see how 1Grow helps.</strong>
-          </p>
-        </Reveal>
+      <Container>
+        <SectionHead
+          id="industries-heading"
+          eyebrow="Industry Solutions"
+          title="Built for your industry"
+          lead={
+            <>
+              1Grow works for training academies, rental firms, and event planners across India.
+              Each industry gets custom workflows, reports, and tools designed for your business type.{' '}
+              <strong className="text-[var(--heading)] font-semibold">
+                Pick your industry below to see how 1Grow helps.
+              </strong>
+            </>
+          }
+        />
 
-        <div className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {industries.map((industry, i) => (
-            <Reveal key={industry.name} delay={(i % 5) * 0.06}>
-              <a
-                href={`/solutions#${industry.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className={`group flex flex-col items-center gap-3 rounded-2xl border p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/5 ${industry.color}`}
-                aria-label={`Learn how 1Grow helps ${industry.name} businesses`}
-              >
-                <div className="grid size-12 place-items-center rounded-xl bg-white/80 shadow-sm">
-                  <industry.icon className="size-6" aria-hidden="true" />
-                </div>
-                <p className="text-sm font-semibold">{industry.name}</p>
-              </a>
-            </Reveal>
-          ))}
+        {/* Filter Segmented Control */}
+        <div className="flex justify-center mb-12" role="tablist" aria-label="Filter industry solutions">
+          <div className="inline-flex items-center gap-2 rounded-full border border-line bg-[var(--surface-2)] p-1.5 shadow-xs">
+            {(
+              [
+                { id: 'all', label: 'All Solutions' },
+                { id: 'training', label: 'Training Institutes' },
+                { id: 'rental', label: 'Rental Businesses' },
+                { id: 'event', label: 'Event Companies' },
+              ] as const
+            ).map((filter) => {
+              const isActive = activeFilter === filter.id
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  role="tab"
+                  aria-selected={isActive}
+                  className={cn(
+                    'h-10 px-5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--primary)]',
+                    isActive
+                      ? 'bg-[var(--primary)] text-white shadow-sm'
+                      : 'text-[var(--ink-2)] hover:text-[var(--heading)] hover:bg-[var(--surface)]',
+                  )}
+                >
+                  {filter.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
+
+        {/* 10 Industry Cards in 2/3 column layout with accent colors (§3, §5, §6) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 items-stretch">
+          {filteredIndustries.map((ind, idx) => {
+            const IconComponent = iconMap[ind.icon] || Package
+            const accentClass = accentCycles[idx % accentCycles.length]
+
+            return (
+              <Reveal key={ind.id} delay={(idx % 3) * 0.08} className="flex">
+                <div
+                  className={cn(
+                    'accent-card group flex flex-col justify-between w-full p-8 rounded-[28px] card-spotlight',
+                    accentClass,
+                  )}
+                >
+                  {/* Decorative soft bleeding corner circle (§5) */}
+                  <div className="dec-circle" aria-hidden="true" />
+
+                  <div>
+                    {/* 64px Squircle with wiggle hover (§5, §6) */}
+                    <div className="icon-blob mb-6 shadow-sm">
+                      <IconComponent
+                        className="size-7"
+                        style={{ color: 'var(--card-accent-icon)' }}
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    {/* Title 24px Outfit 600 */}
+                    <h3 className="font-display text-[24px] font-semibold text-[var(--heading)] leading-tight">
+                      {ind.name}
+                    </h3>
+
+                    {/* Description 17px/28px — NO LINE CLAMP */}
+                    <p className="mt-3 text-[17px] leading-[28px] text-[var(--ink-2)]">
+                      {ind.description}
+                    </p>
+                  </div>
+
+                  {/* Learn More link with sliding arrow */}
+                  <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/10">
+                    <Link
+                      href={ind.href}
+                      className="link-arrow text-[16px] font-bold"
+                      style={{ color: 'var(--card-accent-icon)' }}
+                      aria-label={`Learn more about 1Grow for ${ind.name}`}
+                    >
+                      <span>Learn more</span>
+                      <ArrowRight className="size-4.5" aria-hidden="true" />
+                    </Link>
+                  </div>
+                </div>
+              </Reveal>
+            )
+          })}
+        </div>
+      </Container>
+
+      {/* Wave ending transitioning into Problems section (tint) (§4) */}
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
+        <WaveDivider to="tint" shape="B" />
       </div>
     </section>
   )

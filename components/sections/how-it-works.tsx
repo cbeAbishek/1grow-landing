@@ -1,101 +1,94 @@
-import { Reveal } from "@/components/reveal";
-import { UserPlus, Building2, LayoutGrid, Users, Rocket } from "lucide-react";
+'use client'
 
-const steps = [
-  {
-    icon: UserPlus,
-    title: "Create Account",
-    description: "Sign up in seconds with a 20-day free trial. No credit card required and no commitment.",
-    color: "bg-primary/10 text-primary",
-    number: "bg-primary text-primary-foreground",
-  },
-  {
-    icon: Building2,
-    title: "Set Up Your Business",
-    description: "Add your branches, staff members, and customize branding to match your business identity.",
-    color: "bg-accent-blue/10 text-accent-blue",
-    number: "bg-accent-blue text-white",
-  },
-  {
-    icon: LayoutGrid,
-    title: "Import Your Data",
-    description: "Add customers, students, inventory items, events, or migrate your existing records seamlessly.",
-    color: "bg-accent-red/10 text-accent-red",
-    number: "bg-accent-red text-white",
-  },
-  {
-    icon: Users,
-    title: "Manage Daily Operations",
-    description: "Track attendance, collect fees, send notifications, and manage teams - all automated.",
-    color: "bg-accent-green/10 text-accent-green",
-    number: "bg-accent-green text-white",
-  },
-  {
-    icon: Rocket,
-    title: "Grow Your Business",
-    description: "Leverage analytics dashboards, revenue reports, and smart insights to drive growth.",
-    color: "bg-accent-cyan/10 text-accent-cyan",
-    number: "bg-accent-cyan text-white",
-  },
-];
+import React from 'react'
+import {
+  UserPlus,
+  Building2,
+  LayoutGrid,
+  Users,
+  Rocket,
+  CheckCircle2,
+  ArrowRight,
+} from 'lucide-react'
+import { Container } from '@/components/layout/container'
+import { SectionHead } from '@/components/layout/section-head'
+import { Reveal } from '@/components/motion/reveal'
+import { WaveDivider } from '@/components/layout/wave-divider'
+import { steps } from '@/content/landing'
+import { cn } from '@/lib/utils'
+
+const stepIcons = [UserPlus, Building2, LayoutGrid, Users, Rocket]
 
 export function HowItWorks() {
   return (
     <section
       id="how-it-works"
+      data-band="light"
       aria-labelledby="how-it-works-heading"
-      className="scroll-mt-24 px-4 py-24"
+      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg)]"
     >
-      <div className="mx-auto max-w-6xl">
-        <Reveal className="text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-accent-blue/20 bg-accent-blue/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent-blue">
-            How It Works
-          </span>
-          <h2
-            id="how-it-works-heading"
-            className="mt-5 text-balance font-heading text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
-          >
-            From sign-up to live operations in five simple steps
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Getting started with 1Grow takes minutes. Follow this step-by-step
-            process to move from setup to daily operations without technical
-            assistance.
-          </p>
-        </Reveal>
+      <Container>
+        <SectionHead
+          id="how-it-works-heading"
+          eyebrow="How It Works"
+          title="From sign-up to live operations in five simple steps"
+          lead="Getting started with 1Grow takes minutes. Follow this step-by-step process to move from setup to automated daily operations without technical complexity."
+        />
 
+        {/* 5-Step Timeline Grid with Connecting Rail Line */}
         <div className="relative mt-16">
           <div
             aria-hidden="true"
-            className="absolute left-14 right-14 top-7 hidden h-px bg-gradient-to-r from-primary/20 via-accent-blue/20 to-accent-cyan/20 lg:block"
+            className="absolute top-8 left-16 right-16 hidden h-[3px] bg-gradient-to-r from-[var(--primary)] via-[#f43f5e] to-[#8b5cf6] lg:block opacity-40"
           />
-          <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-            {steps.map((step, i) => (
-              <Reveal key={step.title} delay={i * 0.1} as="li">
-                <div className="relative flex flex-col items-center text-center lg:items-start lg:text-left">
-                  <div
-                    className={`relative z-10 grid size-14 place-items-center rounded-2xl border border-border bg-card shadow-sm ${step.color}`}
-                  >
-                    <step.icon className="size-6" aria-hidden="true" />
-                    <span
-                      className={`absolute -right-2 -top-2 grid size-6 place-items-center rounded-full text-xs font-bold shadow-md ${step.number}`}
-                      aria-label={`Step ${i + 1}`}
-                    >
-                      {i + 1}
-                    </span>
+
+          <ol className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
+            {steps.map((step, i) => {
+              const Icon = stepIcons[i] || Rocket
+              return (
+                <Reveal key={step.number} delay={i * 0.09} as="li" className="h-full flex">
+                  <div className="group relative flex h-full flex-col justify-between w-full rounded-[28px] border border-line bg-[var(--surface)] p-7 shadow-[var(--shadow-1)] transition-all duration-300 hover:-translate-y-2 hover:border-[var(--accent-orange-200)] hover:shadow-[var(--shadow-2)] card-spotlight">
+                    <div>
+                      {/* Node circle on top */}
+                      <div className="flex items-center justify-between pb-5 border-b border-line/60">
+                        <div className="relative z-10 grid size-14 place-items-center rounded-2xl bg-[var(--cloud-tint)] text-[var(--primary)] font-display text-xl font-bold shadow-xs group-hover:bg-[var(--primary)] group-hover:text-white transition-colors duration-300">
+                          {step.number}
+                        </div>
+                        <div className="grid size-10 place-items-center rounded-xl bg-[var(--surface-tint)] text-[var(--primary)]">
+                          <Icon className="size-5" aria-hidden="true" />
+                        </div>
+                      </div>
+
+                      {/* Step Title & Description */}
+                      <div className="mt-5">
+                        <h3 className="font-display text-xl font-bold text-[var(--heading)] group-hover:text-[var(--primary)] transition-colors">
+                          {step.title}
+                        </h3>
+                        <p className="mt-2.5 text-base text-[var(--ink-2)] leading-relaxed">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Micro UI visual badge */}
+                    <div className="mt-6 pt-4 border-t border-line/50">
+                      <div className="inline-flex items-center gap-2 rounded-full bg-[var(--cloud-tint)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">
+                        <span className="size-1.5 rounded-full bg-[var(--success)]" />
+                        <span>{step.visual}</span>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="mt-5 font-heading text-base font-bold">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {step.description}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
+                </Reveal>
+              )
+            })}
           </ol>
         </div>
+      </Container>
+
+      {/* Wave ending transitioning into Features Overview (tint) (§4) */}
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
+        <WaveDivider to="tint" shape="C" />
       </div>
     </section>
-  );
+  )
 }

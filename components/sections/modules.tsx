@@ -1,248 +1,258 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
+import React, { useState } from 'react'
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  ArrowRight,
-  CalendarDays,
-  Check,
   GraduationCap,
   Package,
   PartyPopper,
-} from "lucide-react";
+  Check,
+  ArrowRight,
+  CalendarDays,
+  TrendingUp,
+} from 'lucide-react'
+import { Container } from '@/components/layout/container'
+import { SectionHead } from '@/components/layout/section-head'
+import { ActionButton } from '@/components/ui/action-button'
+import { Reveal } from '@/components/motion/reveal'
+import { WaveDivider } from '@/components/layout/wave-divider'
+import { modulesData } from '@/content/landing'
+import { cn } from '@/lib/utils'
 
-const modules = [
-  {
-    id: "training",
-    tab: "Training",
-    icon: GraduationCap,
-    title: "Training Management",
-    description:
-      "Run your academy end to end. Capture enquiries, enroll students, schedule batches, track attendance, and collect fees automatically. Works for dance, music, tuition, yoga, martial arts, and swimming academies.",
-    features: [
-      "Lead Management",
-      "Student Enrollment",
-      "Batch Scheduling",
-      "Attendance Tracking",
-      "Fee Collection",
-      "Progress Reports",
-      "Certification",
-    ],
-    rows: [
-      { name: "Bharatanatyam — Batch A", meta: "24 students", tag: "Active" },
-      { name: "Vocal Music — Evening", meta: "18 students", tag: "Active" },
-      { name: "Yoga — Weekend", meta: "31 students", tag: "Enrolling" },
-    ],
-    color: "#F5A623",
-    iconBg: "bg-primary/10 text-primary",
-    tagColor: "bg-primary/10 text-primary",
-  },
-  {
-    id: "rental",
-    tab: "Rental",
-    icon: Package,
-    title: "Rental Management",
-    description:
-      "Track every item from booking to return. Know what is available, out for delivery, or in maintenance at a glance. Made for equipment rental, costume rental, and event supply businesses.",
-    features: [
-      "Inventory Management",
-      "Availability Calendar",
-      "Booking Management",
-      "Dispatch Tracking",
-      "Return Processing",
-      "Damage Assessment",
-    ],
-    rows: [
-      { name: "Stage Lighting Kit", meta: "Out — returns Sat", tag: "Booked" },
-      { name: "Costume Set — Royal", meta: "Available x6", tag: "Ready" },
-      { name: "Sound System Pro", meta: "Maintenance", tag: "Service" },
-    ],
-    color: "#0099FF",
-    iconBg: "bg-accent-blue/10 text-accent-blue",
-    tagColor: "bg-accent-blue/10 text-accent-blue",
-  },
-  {
-    id: "event",
-    tab: "Event",
-    icon: PartyPopper,
-    title: "Event Management",
-    description:
-      "Plan and deliver great events. From first enquiry and quote to team setup, budget tracking, and closure reports. Built for event companies, wedding planners, and photo studios.",
-    features: [
-      "Lead Tracking",
-      "Quotation Builder",
-      "Team Assignment",
-      "Task Management",
-      "Budget Monitoring",
-      "Event Closure Reports",
-    ],
-    rows: [
-      { name: "Sharma Wedding", meta: "4.2L budget", tag: "Planning" },
-      { name: "Corporate Gala", meta: "12 tasks open", tag: "On Track" },
-      { name: "Annual Day Show", meta: "Quote sent", tag: "Pending" },
-    ],
-    color: "#FF4D6A",
-    iconBg: "bg-accent-red/10 text-accent-red",
-    tagColor: "bg-accent-red/10 text-accent-red",
-  },
-];
+const iconMap: Record<string, React.ElementType> = {
+  training: GraduationCap,
+  rental: Package,
+  event: PartyPopper,
+}
 
 export function Modules() {
-  const [active, setActive] = useState(modules[0]);
-  const activeIndex = modules.findIndex((m) => m.id === active.id);
-  const manualRef = useRef(false);
-  const manualTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!manualRef.current) {
-        setActive((prev) => {
-          const idx = modules.findIndex((m) => m.id === prev.id);
-          return modules[(idx + 1) % modules.length];
-        });
-      }
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
-
-  function handleTabClick(m: (typeof modules)[0]) {
-    setActive(m);
-    manualRef.current = true;
-    if (manualTimerRef.current) clearTimeout(manualTimerRef.current);
-    manualTimerRef.current = setTimeout(() => {
-      manualRef.current = false;
-    }, 20000);
-  }
+  const [activeTab, setActiveTab] = useState(0)
+  const current = modulesData[activeTab]
+  const Icon = iconMap[current.id] || GraduationCap
 
   return (
-    <section id="modules" aria-labelledby="modules-heading" className="scroll-mt-24 px-4 py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-accent-green/20 bg-accent-green/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent-green">
-            Product Modules
-          </span>
-          <h2 id="modules-heading" className="mt-5 text-balance font-heading text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            Powerful modules that work the way you do
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Turn on only what you need. Each module is built for your industry and connects with billing, CRM, and analytics. Pick Training, Rental, or Event management.
-          </p>
-        </div>
+    <section
+      id="modules"
+      data-band="dark"
+      aria-labelledby="modules-heading"
+      className="relative overflow-hidden pt-24 pb-36 sm:pt-28 sm:pb-44 text-white"
+      style={{
+        background: 'var(--bg-dark-band)',
+      }}
+    >
+      {/* Background glow and subtle dot grid */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        aria-hidden="true"
+        style={{
+          background:
+            'radial-gradient(55% 50% at 50% 10%, rgba(255,107,0,0.25), transparent 75%), radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px) 0 0/28px 28px',
+        }}
+      />
 
-        <div className="mt-14 flex justify-center" role="tablist" aria-label="Select a product module">
-          <div className="relative inline-flex items-center gap-2 rounded-2xl border border-border bg-card p-1.5 shadow-sm">
-            {modules.map((m) => {
-              const isActive = m.id === active.id;
+      <Container>
+        <SectionHead
+          id="modules-heading"
+          eyebrow="Specialized Operations"
+          title={<span className="text-white font-bold">Powerful modules that work the way you do</span>}
+          lead={<span className="text-white/85">Turn on only what you need. Each module is built for your industry and connects seamlessly with billing, CRM, and analytics. Pick Training, Rental, or Event management.</span>}
+          className="text-white"
+        />
+
+        {/* Segmented Pill Tab Group on Dark with layoutId (§7) */}
+        <div className="flex justify-center mb-14" role="tablist" aria-label="Select product module">
+          <div className="relative inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 p-1.5 backdrop-blur-md shadow-xs">
+            {modulesData.map((m, idx) => {
+              const TabIcon = iconMap[m.id] || GraduationCap
+              const isActive = activeTab === idx
               return (
                 <button
                   key={m.id}
-                  onClick={() => handleTabClick(m)}
+                  onClick={() => setActiveTab(idx)}
                   role="tab"
                   aria-selected={isActive}
-                  aria-controls={`panel-${m.id}`}
-                  className={`relative flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                  aria-controls={`module-panel-${m.id}`}
+                  className={cn(
+                    'relative z-10 flex items-center gap-2.5 h-11 px-6 rounded-full text-sm font-bold transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-white',
                     isActive
-                      ? "shadow-lg"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                  style={
-                    isActive
-                      ? {
-                          color: "#fff",
-                          background: m.color,
-                          boxShadow: `0 4px 20px ${m.color}35, 0 0 0 1px ${m.color}20`,
-                        }
-                      : undefined
-                  }
+                      ? 'text-white'
+                      : 'text-white/70 hover:text-white',
+                  )}
                 >
-                  <m.icon className="size-4" aria-hidden="true" />
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeModuleTab"
+                      className="absolute inset-0 bg-[var(--primary)] rounded-full -z-10 shadow-md"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <TabIcon className="size-4.5 shrink-0" aria-hidden="true" />
                   <span>{m.tab}</span>
                 </button>
-              );
+              )
             })}
           </div>
         </div>
 
-        <div className="mt-10">
-          <div
-            key={active.id}
-            id={`panel-${active.id}`}
-            role="tabpanel"
-            aria-label={`${active.tab} module details`}
-            className="grid items-center gap-8 rounded-3xl border bg-card p-6 sm:p-10 lg:grid-cols-2"
-            style={{ borderColor: `${active.color}20` }}
-          >
-            <div>
-              <div
-                className="grid size-12 place-items-center rounded-2xl"
-                style={{ background: `${active.color}15`, color: active.color }}
-              >
-                <active.icon className="size-6" aria-hidden="true" />
-              </div>
-              <h3 className="mt-5 font-heading text-2xl font-bold">
-                {active.title}
-              </h3>
-              <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
-                {active.description}
-              </p>
-              <ul className="mt-6 grid grid-cols-2 gap-2.5">
-                {active.features.map((f) => (
-                  <li
-                    key={f}
-                    className="flex items-center gap-2 text-sm text-foreground/70"
-                  >
-                    <span
-                      className="grid size-5 place-items-center rounded-full"
-                      style={{ background: `${active.color}15`, color: active.color }}
-                    >
-                      <Check className="size-3" aria-hidden="true" />
-                    </span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <a
-                href="/pricing"
-                className="mt-7 inline-flex h-12 items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl px-7 text-base font-semibold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                style={{ background: `linear-gradient(135deg, ${active.color} 0%, ${active.color}CC 100%)`, boxShadow: `0 4px 14px ${active.color}30` }}
-                aria-label={`View ${active.tab} pricing`}
-              >
-                Explore {active.tab}
-                <ArrowRight className="size-5 shrink-0" aria-hidden="true" />
-              </a>
+        {/* Module Content Layout: Left Copy (5 cols) | Right Dark Dashboard Window (7 cols) */}
+        <div
+          id={`module-panel-${current.id}`}
+          role="tabpanel"
+          aria-label={`${current.title} panel`}
+          className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-14"
+        >
+          {/* Left Column: Copy & Checklist */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-bold text-white">
+              <Icon className="size-4" />
+              <span>{current.badge}</span>
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface-alt p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <p className="text-sm font-medium text-foreground/70">
-                  {active.title}
-                </p>
-                <CalendarDays className="size-4 text-muted-foreground" aria-hidden="true" />
-              </div>
-              <div className="space-y-2.5">
-                {active.rows.map((row) => (
-                  <div
-                    key={row.name}
-                    className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 transition-all hover:shadow-md"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">{row.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {row.meta}
-                      </p>
-                    </div>
-                    <span
-                      className="rounded-full px-2.5 py-1 text-xs font-medium"
-                      style={{ background: `${active.color}15`, color: active.color }}
-                    >
-                      {row.tag}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <h3 className="font-display text-3xl sm:text-4xl font-bold text-white leading-tight">
+              {current.title}
+            </h3>
+
+            <p className="text-lg text-white/85 leading-relaxed">
+              {current.description}
+            </p>
+
+            {/* Checklist with Custom Badges */}
+            <ul className="space-y-3.5 pt-2">
+              {current.features.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span className="grid size-6 place-items-center rounded-full bg-emerald-500/20 text-emerald-400 shrink-0 mt-0.5">
+                    <Check className="size-3.5 stroke-[3]" aria-hidden="true" />
+                  </span>
+                  <span className="text-base text-white/90 font-medium leading-normal">
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="pt-4">
+              <ActionButton
+                href="/wishlist"
+                variant="pill"
+                showArrow
+                aria-label={`Get started with ${current.tab}`}
+              >
+                Get Started with {current.tab}
+              </ActionButton>
             </div>
           </div>
+
+          {/* Right Column: Interactive Dark Dashboard Mockup */}
+          <div className="lg:col-span-7">
+            <Reveal
+              direction="right"
+              className="relative overflow-hidden rounded-[36px] border border-white/12 bg-white/6 p-6 sm:p-8 backdrop-blur-xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)]"
+            >
+              <div className="space-y-5">
+                {/* Mock Window Title */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-10 place-items-center rounded-xl bg-white/10 text-white">
+                      <Icon className="size-5" />
+                    </div>
+                    <div>
+                      <p className="text-base font-bold text-white">{current.title}</p>
+                      <p className="text-xs text-white/60">Live Operational Feed</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80">
+                    <CalendarDays className="size-3.5 text-sky-400" />
+                    <span>Real-Time Sync</span>
+                  </div>
+                </div>
+
+                {/* Live Row Records */}
+                <div className="space-y-3">
+                  {current.rows.map((row) => (
+                    <div
+                      key={row.name}
+                      className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/5 p-4 transition-colors hover:bg-white/10"
+                    >
+                      <div>
+                        <p className="text-base font-semibold text-white">{row.name}</p>
+                        <p className="text-xs text-white/60 mt-0.5">{row.meta}</p>
+                      </div>
+                      <span className={cn('rounded-full px-3 py-1 text-xs font-bold shrink-0', row.tagColor)}>
+                        {row.tag}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* SVG Bar Chart with Animated Draw */}
+                <div className="rounded-2xl border border-white/8 bg-white/5 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold text-white/90 flex items-center gap-1.5">
+                      <TrendingUp className="size-4 text-[var(--primary)]" /> Operational Volume &amp; Capacity
+                    </span>
+                    <span className="text-[11px] text-white/60 font-mono">Last 6 Months</span>
+                  </div>
+
+                  <svg viewBox="0 0 360 80" className="w-full h-20">
+                    {[0, 25, 50, 75].map((y) => (
+                      <line
+                        key={y}
+                        x1="0"
+                        y1={y}
+                        x2="360"
+                        y2={y}
+                        stroke="rgba(255,255,255,0.08)"
+                        strokeWidth="1"
+                        strokeDasharray="2 2"
+                      />
+                    ))}
+                    {current.chartData.map((d, i) => {
+                      const barWidth = 14
+                      const gap = 46
+                      const x = i * (barWidth * 2 + gap) + 16
+                      const h1 = (d.primary / 100) * 70
+                      const h2 = (d.secondary / 100) * 70
+                      return (
+                        <g key={d.label}>
+                          <rect
+                            x={x}
+                            y={80 - h1}
+                            width={barWidth}
+                            height={h1}
+                            rx="3"
+                            fill="var(--primary)"
+                            className="transition-all duration-500 ease-out"
+                          />
+                          <rect
+                            x={x + barWidth + 2}
+                            y={80 - h2}
+                            width={barWidth}
+                            height={h2}
+                            rx="3"
+                            fill="#57a3fd"
+                            className="transition-all duration-500 ease-out"
+                          />
+                        </g>
+                      )
+                    })}
+                  </svg>
+                  <div className="mt-1 flex justify-between px-2 text-[10px] text-white/50 font-mono">
+                    {current.chartData.map((d) => (
+                      <span key={d.label}>{d.label}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </div>
+      </Container>
+
+      {/* Wave ending transitioning into WhyChooseUs (light) (§4) */}
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
+        <WaveDivider to="light" shape="A" />
       </div>
     </section>
-  );
+  )
 }

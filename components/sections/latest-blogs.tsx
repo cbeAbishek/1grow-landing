@@ -1,75 +1,107 @@
-import { Reveal } from '@/components/reveal'
-import { ArrowRight, Clock } from 'lucide-react'
+'use client'
 
-const posts = [
-  {
-    slug: 'replacing-spreadsheets-with-saas-erp',
-    title: 'Why Training Academies Should Replace Spreadsheets with a SaaS ERP',
-    description: 'Discover how digitizing your academy operations can save 10+ hours per week and reduce fee collection time by 70%.',
-    category: 'Industry Insights',
-    readingTime: 5,
-    date: 'Jan 15, 2025',
-  },
-  {
-    slug: 'multi-branch-rental-business-management',
-    title: 'Managing a Multi-Branch Rental Business Without Chaos',
-    description: 'Learn how rental businesses use cloud inventory management to track assets across locations in real time.',
-    category: 'Industry Insights',
-    readingTime: 4,
-    date: 'Jan 22, 2025',
-  },
-  {
-    slug: 'event-management-budget-tracking',
-    title: 'How Event Companies Track Budgets and Profitability in Real Time',
-    description: 'Replace manual budget spreadsheets with real-time tracking dashboards that show profitability per event.',
-    category: 'Product Updates',
-    readingTime: 4,
-    date: 'Feb 1, 2025',
-  },
-]
+import React from 'react'
+import Link from 'next/link'
+import { Clock, ArrowRight, BookOpen } from 'lucide-react'
+import { Container } from '@/components/layout/container'
+import { SectionHead } from '@/components/layout/section-head'
+import { ActionButton } from '@/components/ui/action-button'
+import { Reveal } from '@/components/motion/reveal'
+import { WaveDivider } from '@/components/layout/wave-divider'
+import { blogPosts } from '@/content/landing'
+import { cn } from '@/lib/utils'
 
 export function LatestBlogs() {
-  return (
-    <section id="blog" aria-labelledby="blog-heading" className="scroll-mt-24 px-4 py-24">
-      <div className="mx-auto max-w-6xl">
-        <Reveal className="text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
-            Blog
-          </span>
-          <h2 id="blog-heading" className="mt-5 text-balance font-heading text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            Latest from the blog
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Expert tips and guides for academy owners, rental operators, and event managers. 
-            Learn how to save time, cut costs, and grow your business.
-          </p>
-        </Reveal>
+  const gradients = [
+    'from-orange-500/20 via-amber-500/10 to-transparent',
+    'from-rose-500/20 via-orange-500/10 to-transparent',
+    'from-purple-500/20 via-pink-500/10 to-transparent',
+  ]
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post, i) => (
-            <Reveal key={post.slug} delay={i * 0.08}>
-              <a href={`/blog/${post.slug}`} className="group flex h-full flex-col rounded-3xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">{post.category}</span>
-                  <span className="flex items-center gap-1"><Clock className="size-3" aria-hidden="true" />{post.readingTime} min read</span>
+  return (
+    <section
+      id="blog"
+      data-band="light"
+      aria-labelledby="blog-heading"
+      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg)]"
+    >
+      <Container>
+        <SectionHead
+          id="blog-heading"
+          eyebrow="Insights &amp; Updates"
+          title="Latest from the blog"
+          lead="Expert tips and operating playbooks for academy founders, rental operators, and event managers. Learn how to save hours every week and run a modern institution."
+        />
+
+        {/* 3-Col Grid with Horizontal Snap Rail on Mobile (§6, §7.15) */}
+        <div className="mt-16 flex gap-7 overflow-x-auto pb-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0">
+          {blogPosts.map((post, i) => (
+            <Reveal
+              key={post.slug}
+              delay={i * 0.08}
+              className="min-w-[85%] sm:min-w-0 snap-center shrink-0 flex-1 flex"
+            >
+              <Link
+                href={`/blog/${post.slug}`}
+                className="group flex flex-col justify-between w-full h-full rounded-[28px] border border-line bg-[var(--surface)] p-7 shadow-[var(--shadow-1)] transition-all duration-300 hover:-translate-y-2 hover:border-[var(--accent-orange-200)] hover:shadow-[var(--shadow-2)] card-spotlight"
+              >
+                <div>
+                  {/* Gradient Art Header with image scale(1.06) on hover (§6) */}
+                  <div
+                    className={cn(
+                      'aspect-video w-full rounded-[20px] bg-gradient-to-br flex items-center justify-center mb-6 overflow-hidden border border-line/50 transition-transform duration-300 group-hover:scale-[1.04]',
+                      gradients[i % gradients.length],
+                    )}
+                  >
+                    <BookOpen className="size-12 text-[var(--primary)]/70 transition-transform duration-300 group-hover:scale-110" />
+                  </div>
+
+                  {/* Category Pill & Reading Time */}
+                  <div className="flex items-center gap-3 text-xs mb-3.5">
+                    <span className="rounded-full bg-[var(--cloud-tint)] px-3 py-1 font-bold text-[var(--primary)] border border-[var(--accent-orange-200)]">
+                      {post.category}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[var(--ink-3)] font-semibold">
+                      <Clock className="size-3.5" aria-hidden="true" />
+                      {post.readingTime} min read
+                    </span>
+                  </div>
+
+                  {/* Post Title -> Blue on hover (§6) */}
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-[var(--heading)] group-hover:text-[var(--primary)] transition-colors leading-snug">
+                    {post.title}
+                  </h3>
+
+                  <p className="mt-3 text-base text-[var(--ink-2)] leading-relaxed line-clamp-3">
+                    {post.description}
+                  </p>
                 </div>
-                <h3 className="mt-4 font-heading text-base font-bold leading-snug group-hover:text-primary transition-colors">{post.title}</h3>
-                <p className="mt-2 flex-1 text-sm text-muted-foreground">{post.description}</p>
-                <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-primary">
-                  Read full article
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+
+                {/* Read Full Article with sliding arrow */}
+                <div className="mt-7 pt-4 border-t border-line/60 flex items-center gap-2 text-base font-bold text-[var(--primary)]">
+                  <span>Read full article</span>
+                  <ArrowRight className="size-4.5 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
                 </div>
-              </a>
+              </Link>
             </Reveal>
           ))}
         </div>
 
-        <Reveal className="mt-8 text-center">
-          <a href="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+        {/* Section Footer: Outline Pill CTA */}
+        <div className="mt-14 text-center">
+          <ActionButton
+            href="/blog"
+            variant="secondary"
+            showArrow
+          >
             View all articles and guides
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </a>
-        </Reveal>
+          </ActionButton>
+        </div>
+      </Container>
+
+      {/* Wave ending transitioning into FAQ (tint) (§4) */}
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
+        <WaveDivider to="tint" shape="C" />
       </div>
     </section>
   )

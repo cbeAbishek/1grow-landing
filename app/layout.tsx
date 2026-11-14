@@ -1,35 +1,31 @@
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Sora } from "next/font/google";
+import { Outfit, Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AppMotionProvider } from "@/components/motion/motion-provider";
 import { siteConfig } from "@/lib/seo-config";
 import { organizationSchema, websiteSchema, localBusinessSchema, renderJsonLd } from "@/lib/seo";
 import "./globals.css";
+import "./hero-platform.css";
 
 const Analytics = dynamic(() =>
   import("@vercel/analytics/next").then((m) => ({ default: m.Analytics }))
 );
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-  display: "optional",
+  weight: ["500", "600"],
+  display: "swap",
   preload: true,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  display: "optional",
-  preload: true,
-});
-
-const sora = Sora({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  display: "optional",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
   preload: true,
 });
 
@@ -156,7 +152,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${sora.variable}`}
+      className={`${inter.variable} ${outfit.variable}`}
     >
       <head>
         <link rel="preconnect" href="https://vercel.live" />
@@ -174,7 +170,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AppMotionProvider>
+            {children}
+          </AppMotionProvider>
         </ThemeProvider>
         {process.env.NODE_ENV === "production" && <Analytics />}
         <Script

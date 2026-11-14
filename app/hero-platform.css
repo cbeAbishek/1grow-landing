@@ -1,0 +1,195 @@
+/* 1Grow Phase 1 & 2 Custom Keyframes (§16) */
+
+/* Hero Headline Entrance */
+.hw {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+  vertical-align: top;
+}
+.hw-i {
+  display: inline-block;
+  transform: translateY(115%);
+  animation: hw-rise 800ms var(--ease-out, cubic-bezier(0.2, 1, 0.25, 1)) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 150ms);
+}
+@keyframes hw-rise {
+  to {
+    transform: none;
+  }
+}
+
+.hl-wipe {
+  background: linear-gradient(90deg, #0176d3, #7526e3 55%, #f59e0b) 100% 0 / 200% 100% no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hl-wipe 900ms var(--ease-out, cubic-bezier(0.2, 1, 0.25, 1)) both;
+  animation-delay: 1100ms;
+}
+@keyframes hl-wipe {
+  to {
+    background-position: 0 0;
+  }
+}
+
+.squiggle-draw path {
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  animation: drawSquiggleLine 800ms var(--ease-out, cubic-bezier(0.2, 1, 0.25, 1)) 1900ms forwards;
+}
+@keyframes drawSquiggleLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Loop Band Marquee (§7, §16.2) */
+.loop-marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+}
+.loop-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 96px;
+  width: max-content;
+  animation: loop-marquee-anim 50s linear infinite;
+}
+@media (max-width: 640px) {
+  .loop-marquee-track {
+    gap: 56px;
+  }
+}
+.loop-marquee[data-paused="true"] .loop-marquee-track,
+.loop-marquee:hover .loop-marquee-track,
+.loop-marquee:focus-within .loop-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes loop-marquee-anim {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Floating & Twinkle (§16.2) */
+.sym-float {
+  animation: symFloat var(--dur, 6s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+@keyframes symFloat {
+  from {
+    transform: translateY(calc(var(--amp, 12px) * -1)) rotate(-3deg);
+  }
+  to {
+    transform: translateY(var(--amp, 12px)) rotate(3deg);
+  }
+}
+
+.sparkle-twinkle {
+  animation: sparkleTwinkle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+@keyframes sparkleTwinkle {
+  from {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Tab Progress Autoplay (§16.3) */
+.tab-progress-bar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 4px;
+  height: 3px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: rgba(1, 118, 211, 0.15);
+}
+.tab-progress-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: var(--accent-blue, #0176d3);
+  animation: tabFill 6000ms linear forwards;
+}
+.showcase-panel[data-paused="true"] .tab-progress-fill,
+.showcase-panel:hover .tab-progress-fill,
+.showcase-panel:focus-within .tab-progress-fill {
+  animation-play-state: paused;
+}
+@keyframes tabFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Wave Drift (§8.3) */
+.wave-back-drift {
+  animation: waveBackDrift 16s ease-in-out infinite alternate;
+}
+@keyframes waveBackDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-70px);
+  }
+}
+
+.wave-mid-drift {
+  animation: waveMidDrift 18s ease-in-out infinite alternate;
+}
+@keyframes waveMidDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(40px);
+  }
+}
+
+/* Wishlist Pill Shine (§3.2) */
+.wishlist-pill-shine {
+  position: relative;
+  overflow: hidden;
+}
+.wishlist-pill-shine::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  transform: rotate(25deg);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.wishlist-pill-shine:hover::after {
+  opacity: 1;
+  animation: pillShine 600ms ease-out forwards;
+}
+@keyframes pillShine {
+  0% {
+    left: -60%;
+  }
+  100% {
+    left: 140%;
+  }
+}

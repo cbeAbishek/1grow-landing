@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Hero } from '@/components/sections/hero'
+import { PlatformSection } from '@/components/landing/platform/PlatformSection'
 import { WhoIsThisFor } from '@/components/sections/who-is-this-for'
 import { ProblemsWeSolve } from '@/components/sections/problems-we-solve'
 import { HowItWorks } from '@/components/sections/how-it-works'
@@ -9,6 +10,7 @@ import { FeaturesOverview } from '@/components/sections/features-overview'
 import { Modules } from '@/components/sections/modules'
 import { WhyChooseUs } from '@/components/sections/why-choose-us'
 import { PricingPreview } from '@/components/sections/pricing-preview'
+import { StatStrip } from '@/components/sections/stat-strip'
 import { LatestBlogs } from '@/components/sections/latest-blogs'
 import { Faq } from '@/components/sections/faq'
 import { FinalCta } from '@/components/sections/final-cta'
@@ -71,6 +73,10 @@ import {
     {
       question: 'Can I try 1Grow before paying?',
       answer: 'Yes. Start with a 20-day free trial. You get full access to every feature. Invite your team. Import your data. If it works for you, choose a plan. If not, no charge.',
+    },
+    {
+      question: 'How does fee collection work?',
+      answer: 'The platform automates fee collection with WhatsApp payment links, email reminders, and SMS notifications. Students and parents receive payment requests automatically, and receipts are generated instantly upon payment confirmation.',
     },
   ]
 
@@ -156,6 +162,7 @@ export default function Page() {
           <p>1Grow is built by NexGenAds Technologies Pvt Ltd for Indian businesses. Support available in Tamil, Hindi, and English.</p>
         </div>
         <Hero />
+        <PlatformSection />
         <WhoIsThisFor />
         <ProblemsWeSolve />
         <HowItWorks />
@@ -163,6 +170,7 @@ export default function Page() {
         <Modules />
         <WhyChooseUs />
         <PricingPreview />
+        <StatStrip />
         <LatestBlogs />
         <Faq />
         <FinalCta />

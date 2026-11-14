@@ -1,0 +1,9 @@
+export const N = 6;
+export const T_VH = 85;        // scroll distance per card transition, in vh
+export const DWELL_VH = 30;    // extra dwell after the last card
+export const STRIP = 56;       // px of each buried card's strip that stays visible
+export const MAX_STRIPS = 2;   // visible buried strips; deeper ones fade out
+export const SCALE_STEP = 0.035;
+export const DIM_STEP = 0.10;  // darkening overlay per depth
+export const ENTER_EXTRA = 120; // px beyond card height the entering card starts below
+export const NAV_BREAKPOINT = 1024;
