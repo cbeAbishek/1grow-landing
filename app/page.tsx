@@ -6,11 +6,8 @@ import { PlatformSection } from '@/components/landing/platform/PlatformSection'
 import { WhoIsThisFor } from '@/components/sections/who-is-this-for'
 import { ProblemsWeSolve } from '@/components/sections/problems-we-solve'
 import { HowItWorks } from '@/components/sections/how-it-works'
-import { FeaturesOverview } from '@/components/sections/features-overview'
-import { Modules } from '@/components/sections/modules'
 import { WhyChooseUs } from '@/components/sections/why-choose-us'
 import { PricingPreview } from '@/components/sections/pricing-preview'
-import { StatStrip } from '@/components/sections/stat-strip'
 import { LatestBlogs } from '@/components/sections/latest-blogs'
 import { Faq } from '@/components/sections/faq'
 import { FinalCta } from '@/components/sections/final-cta'
@@ -140,14 +137,14 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-background overflow-x-clip">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd({ '@context': 'https://schema.org', '@graph': schemas }) }}
         key="homepage-schemas"
       />
       <SiteHeader />
-      <main>
+      <main className="overflow-x-clip">
         <div className="sr-only article-summary" aria-hidden="true">
           <h1>1Grow - One Platform for Academies, Rentals and Events</h1>
           <p>1Grow is a cloud ERP that helps training institutes, rental businesses, and event companies manage leads, operations, teams, payments, and analytics from one dashboard. Replace WhatsApp, Excel, and paper registers with automation. Get a 20-day free trial. No credit card required.</p>
@@ -166,11 +163,8 @@ export default function Page() {
         <WhoIsThisFor />
         <ProblemsWeSolve />
         <HowItWorks />
-        <FeaturesOverview />
-        <Modules />
         <WhyChooseUs />
         <PricingPreview />
-        <StatStrip />
         <LatestBlogs />
         <Faq />
         <FinalCta />

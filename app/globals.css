@@ -655,6 +655,40 @@
   }
 }
 
+/* How It Works Section: Stages & Thread Halo (§6.1, §8.4) */
+.steps-stage {
+  --step-card-h: clamp(380px, 29vw, 420px);
+  --step-card-w: clamp(256px, 20.5%, 292px);
+}
+
+@keyframes stepsHaloPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes stepsHaloIdle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.22);
+    opacity: 0.15;
+  }
+}
+
+.steps-node-halo-lit {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: stepsHaloPulse 1.2s ease-out 1, stepsHaloIdle 2.4s ease-in-out infinite 1.2s;
+}
+
 /* Corrected Reduced Motion Handling (§2.1, §8.9) */
 @media (prefers-reduced-motion: reduce) {
   /* stop only looping / large-movement effects */
@@ -670,7 +704,8 @@
   .sym,
   .pulse-dot,
   .featured-pricing-card::before,
-  .svg-squiggle path {
+  .svg-squiggle path,
+  .steps-node-halo-lit {
     animation: none !important;
   }
   .reveal-y {

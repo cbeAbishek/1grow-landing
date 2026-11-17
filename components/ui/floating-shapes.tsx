@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import type { ReactElement } from 'react'
 
 interface Shape {
   type: 'circle' | 'square' | 'triangle' | 'hexagon'
@@ -12,7 +13,7 @@ interface Shape {
   duration?: number
 }
 
-const shapeComponents: Record<Shape['type'], (size: number, color: string) => JSX.Element> = {
+const shapeComponents: Record<Shape['type'], (size: number, color: string) => ReactElement> = {
   circle: (size, color) => (
     <div
       className="rounded-full"

@@ -9,6 +9,7 @@
   --hero-grad-mid: #dcecfd;
   --hero-grad-bottom: #cfe4fb;
   --platform-bg: #f4f9ff;
+  --stage-grad: linear-gradient(180deg, #eaf5fe 0%, #bfe0ff 20%, #8ec5ff 40%, #b9a6f5 62%, #e08af0 80%, #ff8fa3 92%, #ffa45c 100%);
   --wave-back: #c4defa;
   --wave-mid: #dcecfd;
   --glass-bg: rgba(255, 255, 255, 0.72);
@@ -184,6 +185,123 @@
   --dur-fast: 150ms;
   --dur-base: 300ms;
   --dur-slow: 700ms;
+
+  /* Section 3 Reference Palette Tokens (§5.1) */
+  --ind-bg: #fdf8f1;
+  --ind-ink: #1a1820;
+  --ind-ink-2: #5a5360;
+  --ind-orange: #ff7a00;
+  --ind-orange-soft: #fff3e6;
+  --ind-sparkle: #fbbf24;
+  --ind-blob-lavender: #d9cffb;
+  --ind-blob-peach: #fbd6bb;
+
+  /* Stage Panel Reference Pastel Gradient (§6.1) */
+  --stage-grad-pastel: linear-gradient(180deg, #eaf3ff 0%, #f6f4ff 25%, #fff6ea 50%, #ffe0c4 78%, #ffc48f 100%);
+
+  /* Page-Wide Section Themes (§7.2) - Light Mode */
+  --t-sky-bg: #eaf3fe;
+  --t-sky-wave1: #d7e8fc;
+  --t-sky-wave2: #bcd8f8;
+
+  --t-sand-bg: #fdf8f1;
+  --t-sand-wave1: #fee2cd;
+  --t-sand-wave2: #fed0ac;
+
+  --t-lavender-bg: #f5f1ff;
+  --t-lavender-wave1: #ebe4fc;
+  --t-lavender-wave2: #ddd0f9;
+
+  --t-mint-bg: #eefaf6;
+  --t-mint-wave1: #ddf4ec;
+  --t-mint-wave2: #c2ecdd;
+
+  --t-blush-bg: var(--faq-bg, #fff4ef);
+  --t-blush-wave1: #fee5e0;
+  --t-blush-wave2: #fccfc7;
+
+  --t-navy-bg: #041226;
+  --t-navy-wave1: #0b2d5c;
+  --t-navy-wave2: #13407f;
+
+  --t-heroSky-bg: #cfe4fb;
+  --t-heroSky-wave1: #c4defa;
+  --t-heroSky-wave2: #a8ccf5;
+
+  --t-platformPale-bg: #f4f9ff;
+  --t-platformPale-wave1: #dbebfd;
+  --t-platformPale-wave2: #c4dcf9;
+
+  /* Reference Wave Tokens - Light Mode */
+  --wave-ref-top-1: #E6EFFD;
+  --wave-ref-top-2: #D3E3FB;
+  --wave-ref-top-3: var(--t-sand-bg, #FDF8F1);
+
+  /* Section 3 Refined Sandal to Soft Rose Wave Tokens */
+  --wave-ref-bottom-1: #FAF1E8;
+  --wave-ref-bottom-2: #F7E7E1;
+  --wave-ref-bottom-3: #fff2f5;
+
+  --wave-rose-start: #FDF8F1;
+  --wave-rose-mid: #FAF0EB;
+  --wave-rose-end: #fff2f5;
+
+  /* Section 5 Background Tokens */
+  --problems-section-bg: linear-gradient(180deg, #fff2f5 0%, #fde8ef 45%, #fbdfeb 100%);
+
+  /* Section 5 to How It Works Lavender Wave & Background Tokens (§2, §3, §7.1) */
+  --wave-lavender-1: #fbf8fe; /* Layer 1: Very light lavender */
+  --wave-lavender-2: #f3ebfc; /* Layer 2: Soft medium lavender */
+  --steps-bg-1: #f8f4ff;
+  --steps-bg-2: #f3ecff;
+  --steps-decor-shape: #e9defb;
+  --wave-lavender-3: var(--steps-bg-1);
+  --how-it-works-bg: linear-gradient(180deg, var(--steps-bg-1) 0%, var(--steps-bg-2) 100%);
+
+  /* How It Works to Why Choose Us Wave Transition */
+  --wave-howitworks-end-1: #e4d8fb;
+  --wave-howitworks-end-2: #f0e8fd;
+  --wave-howitworks-end-3: var(--whyus-bg, #eff9f1);
+
+  /* Why Choose Us Tokens (§6.7) - Light Mode */
+  --whyus-bg: #eff9f1;
+  --whyus-blob-green: #dcf1e1;
+  --whyus-blob-mint: #e2f7ea;
+  --wave-whyus-end-1: #dcf1e1;
+  --wave-whyus-end-2: #c4e8cd;
+  --wave-whyus-end-3: var(--pricing-bg, #fff7ed);
+
+  /* Blog Section Tokens (Warm Sandal / Sand-Beige) - Light Mode */
+  --blog-bg: var(--t-sand-bg, #fdf8f1);
+
+  /* Pricing Tokens (Soft Light Orange / Warm Peach Tint) - Light Mode */
+  --pricing-bg: #fff7ed;
+  --wave-pricing-end-1: #ffedd5;
+  --wave-pricing-end-2: #fed7aa;
+  --wave-pricing-end-3: var(--blog-bg, #fdf8f1);
+
+  /* Blog Wave Transition to FAQ (Peach/Blush) - Light Mode */
+  --wave-blog-end-1: #ffeae1;
+  --wave-blog-end-2: #ffd8cc;
+  --wave-blog-end-3: var(--faq-bg, #fff4ef);
+
+  /* FAQ Tokens (§8.2, §8.6) - Light Mode */
+  --faq-bg: #fff4ef;
+  --faq-blob-peach: #ffe8df;
+  --faq-blob-lavender: #f6eefe;
+  --wave-faq-end-1: #ffe6dd;
+  --wave-faq-end-2: #ffd3c4;
+  --wave-faq-end-3: var(--faq-bg, #fff4ef);
+
+  /* Final CTA Wave Transition - Light Mode */
+  --footer-bg: #ffd3c4;
+  --footer-text: #43281c;
+  --footer-text-muted: #7c5948;
+  --footer-border: #ebb7a6;
+  --footer-card-bg: rgba(255, 255, 255, 0.65);
+  --wave-finalcta-end-1: #ffe6dd;
+  --wave-finalcta-end-2: #fedecf;
+  --wave-finalcta-end-3: var(--footer-bg, #ffd3c4);
 }
 
 @media (min-width: 640px) {
@@ -206,6 +324,7 @@
   --hero-grad-mid: #0e1a30;
   --hero-grad-bottom: #112240;
   --platform-bg: #0d1626;
+  --stage-grad: linear-gradient(180deg, #0f1a2e 0%, #14305a 35%, #3b2a7a 62%, #7a2a8c 82%, #b24a3a 100%);
   --wave-back: #14294a;
   --wave-mid: #0f2038;
   --glass-bg: rgba(17, 28, 48, 0.72);
@@ -258,4 +377,119 @@
   --shadow-2: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
   --shadow-3: 0 16px 36px -6px rgba(0, 0, 0, 0.5);
   --shadow-4: 0 32px 64px -12px rgba(0, 0, 0, 0.6);
+
+  /* Section 3 Reference Palette Tokens (§5.1) - Dark Mode */
+  --ind-bg: #17130f;
+  --ind-ink: #f4f4f5;
+  --ind-ink-2: #a1a1aa;
+  --ind-orange-soft: rgba(255, 122, 0, 0.15);
+  --ind-blob-lavender: #272046;
+  --ind-blob-peach: #2a2118;
+
+  /* Stage Panel Reference Pastel Gradient (§6.1) - Dark Mode */
+  --stage-grad-pastel: linear-gradient(180deg, #0e1626 0%, #171d3a 25%, #24192b 50%, #2b181b 78%, #361c16 100%);
+
+  /* Page-Wide Section Themes (§7.2) - Dark Mode */
+  --t-sky-bg: #0e1a2e;
+  --t-sky-wave1: #12233d;
+  --t-sky-wave2: #183052;
+
+  --t-sand-bg: #17130f;
+  --t-sand-wave1: #1f1913;
+  --t-sand-wave2: #2a2118;
+
+  --t-lavender-bg: #16122a;
+  --t-lavender-wave1: #1d1838;
+  --t-lavender-wave2: #272046;
+
+  --t-mint-bg: #0e1c1a;
+  --t-mint-wave1: #122825;
+  --t-mint-wave2: #183632;
+
+  --t-blush-bg: #1d1214;
+  --t-blush-wave1: #271a1c;
+  --t-blush-wave2: #33211f;
+
+  --t-navy-bg: #050b16;
+  --t-navy-wave1: #0a1830;
+  --t-navy-wave2: #102548;
+
+  --t-heroSky-bg: #0e1a2e;
+  --t-heroSky-wave1: #12233d;
+  --t-heroSky-wave2: #183052;
+
+  --t-platformPale-bg: #0d1626;
+  --t-platformPale-wave1: #12233d;
+  --t-platformPale-wave2: #183052;
+
+  /* Reference Wave Tokens - Dark Mode */
+  --wave-ref-top-1: #12233d;
+  --wave-ref-top-2: #183052;
+  --wave-ref-top-3: var(--t-sand-bg, #17130f);
+
+  /* Section 3 Refined Sandal to Soft Rose Wave Tokens - Dark Mode */
+  --wave-ref-bottom-1: #1f1915;
+  --wave-ref-bottom-2: #271d1c;
+  --wave-ref-bottom-3: #1c1317;
+
+  --wave-rose-start: #17130f;
+  --wave-rose-mid: #221a1b;
+  --wave-rose-end: #1c1317;
+
+  /* Section 5 Background Tokens - Dark Mode */
+  --problems-section-bg: linear-gradient(180deg, #1c1317 0%, #241419 45%, #2d1820 100%);
+
+  /* Section 5 to How It Works Lavender Wave & Background Tokens - Dark Mode (§2, §3, §7.1) */
+  --wave-lavender-1: #1d1738;
+  --wave-lavender-2: #251c44;
+  --steps-bg-1: #150f26;
+  --steps-bg-2: #1b1432;
+  --steps-decor-shape: #2a1f4a;
+  --wave-lavender-3: var(--steps-bg-1);
+  --how-it-works-bg: linear-gradient(180deg, var(--steps-bg-1) 0%, var(--steps-bg-2) 100%);
+
+  /* How It Works to Why Choose Us Wave Transition - Dark Mode */
+  --wave-howitworks-end-1: #272046;
+  --wave-howitworks-end-2: #1d1838;
+  --wave-howitworks-end-3: var(--whyus-bg, #0d1a14);
+
+  /* Why Choose Us Tokens (§6.7) - Dark Mode */
+  --whyus-bg: #0d1a14;
+  --whyus-blob-green: #142a1f;
+  --whyus-blob-mint: #102219;
+  --wave-whyus-end-1: #12261c;
+  --wave-whyus-end-2: #183427;
+  --wave-whyus-end-3: var(--pricing-bg, #1c1511);
+
+  /* Blog Section Tokens - Dark Mode */
+  --blog-bg: var(--t-sand-bg, #17130f);
+
+  /* Pricing Tokens (Warm Dark Peach / Charcoal Tint) - Dark Mode */
+  --pricing-bg: #1c1511;
+  --wave-pricing-end-1: #281b14;
+  --wave-pricing-end-2: #342217;
+  --wave-pricing-end-3: var(--blog-bg, #17130f);
+
+  /* Blog Wave Transition to FAQ (Peach/Blush) - Dark Mode */
+  --wave-blog-end-1: #1f1418;
+  --wave-blog-end-2: #28191e;
+  --wave-blog-end-3: var(--faq-bg, #1d1214);
+
+  /* FAQ Tokens (§8.2, §8.6) - Dark Mode */
+  --faq-bg: #1d1214;
+  --faq-blob-peach: #2a191c;
+  --faq-blob-lavender: #23182b;
+  --wave-faq-end-1: #271a1c;
+  --wave-faq-end-2: #33211f;
+  --wave-faq-end-3: var(--faq-bg, #1d1214);
+
+  /* Final CTA Wave Transition - Dark Mode */
+  --footer-bg: #221618;
+  --footer-text: #f5ece6;
+  --footer-text-muted: #a89487;
+  --footer-border: rgba(255, 255, 255, 0.1);
+  --footer-card-bg: rgba(255, 255, 255, 0.04);
+  --wave-finalcta-end-1: #271a1c;
+  --wave-finalcta-end-2: #2d1e1f;
+  --wave-finalcta-end-3: var(--footer-bg, #221618);
 }

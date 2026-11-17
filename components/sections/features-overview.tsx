@@ -64,7 +64,7 @@ export function FeaturesOverview() {
       id="features"
       data-band="tint"
       aria-labelledby="features-heading"
-      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg-tint)]"
+      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--t-blush-bg,var(--bg-tint))]"
     >
       <Container>
         <SectionHead
@@ -195,7 +195,7 @@ export function FeaturesOverview() {
                   <div>
                     <div className="flex items-center justify-between pb-4 border-b border-line">
                       <span className="text-xs font-bold uppercase tracking-wider text-[var(--primary)]">
-                        {res.badge}
+                        {res.tag}
                       </span>
                       <BookOpen className="size-4 text-[var(--ink-3)]" />
                     </div>
@@ -220,9 +220,9 @@ export function FeaturesOverview() {
         </div>
       </Container>
 
-      {/* Wave ending transitioning into Modules (dark) (§4) */}
+      {/* Wave ending transitioning into Modules (navy) (§4) */}
       <div className="absolute inset-x-0 bottom-0 pointer-events-none">
-        <WaveDivider to="dark" shape="B" />
+        <WaveDivider from="blush" to="navy" variant="E" />
       </div>
     </section>
   )

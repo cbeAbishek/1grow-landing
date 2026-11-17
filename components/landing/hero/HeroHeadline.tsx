@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { Check, Heart, Sparkles } from 'lucide-react'
+import { Check, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { heroData } from '@/content/landing'
 
@@ -19,17 +19,11 @@ export function HeroHeadline() {
       style={{ y, opacity }}
       className="mx-auto max-w-[1240px] px-5 sm:px-8 text-center"
     >
-      {/* Eyebrow Pill */}
-      <div className="inline-flex items-center gap-2.5 rounded-full bg-[var(--cloud-tint)] dark:bg-white/10 px-4 py-1.5 text-sm font-bold text-[var(--accent-blue,#0176d3)] border border-[rgba(1,118,211,0.18)] shadow-xs animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <span className="pulse-dot size-2 rounded-full bg-[var(--accent-blue,#0176d3)]" />
-        <span>{heroData.eyebrow}</span>
-      </div>
-
       {/* H1 with SSR-split word spans for instant LCP safe reveal (§4.2) */}
       <h1
         id="hero-heading"
         aria-label="Manage your entire business from one platform"
-        className="font-display mt-8 text-[clamp(3.25rem,1.2rem+6.2vw,6.25rem)] font-semibold tracking-[-0.03em] text-[var(--heading)] leading-[1.02] text-balance"
+        className="font-display pt-2 sm:pt-4 text-[clamp(3.25rem,1.2rem+6.2vw,6.25rem)] font-semibold tracking-[-0.03em] text-[var(--heading)] leading-[1.02] text-balance"
       >
         <span aria-hidden="true">
           {words.map((word, i) => (
@@ -52,10 +46,11 @@ export function HeroHeadline() {
               aria-hidden="true"
             >
               <path
-                d="M3 13C60 6 120 18 180 11C240 5 280 16 317 9"
+                d="M4 14 C 42 7.5, 82 7, 126 11.5 C 168 16, 212 16, 254 10 C 278 6.5, 298 7.5, 316 11"
                 stroke="#f59e0b"
                 strokeWidth="6"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </span>
@@ -63,7 +58,7 @@ export function HeroHeadline() {
       </h1>
 
       {/* Lead Paragraph (20–22px / 32–34px) */}
-      <p className="mx-auto mt-7 max-w-[780px] text-[20px] sm:text-[22px] leading-[34px] text-[var(--ink-2)] dark:text-zinc-300">
+      <p className="mx-auto mt-7 max-w-[720px] text-[20px] sm:text-[22px] leading-[34px] text-[var(--ink-2)] dark:text-zinc-300">
         {heroData.lead}
       </p>
 

@@ -7,7 +7,7 @@ import { Container } from '@/components/layout/container'
 import { SectionHead } from '@/components/layout/section-head'
 import { ActionButton } from '@/components/ui/action-button'
 import { Reveal } from '@/components/motion/reveal'
-import { WaveDivider } from '@/components/layout/wave-divider'
+import { ReferenceWave } from '@/components/layout/reference-wave'
 import { blogPosts } from '@/content/landing'
 import { cn } from '@/lib/utils'
 
@@ -15,7 +15,7 @@ export function LatestBlogs() {
   const gradients = [
     'from-orange-500/20 via-amber-500/10 to-transparent',
     'from-rose-500/20 via-orange-500/10 to-transparent',
-    'from-purple-500/20 via-pink-500/10 to-transparent',
+    'from-amber-500/20 via-orange-500/10 to-transparent',
   ]
 
   return (
@@ -23,7 +23,8 @@ export function LatestBlogs() {
       id="blog"
       data-band="light"
       aria-labelledby="blog-heading"
-      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg)]"
+      style={{ backgroundColor: 'var(--blog-bg, #fdf8f1)' }}
+      className="relative scroll-mt-24 pt-20 pb-48 sm:pt-24 sm:pb-60 lg:pb-72 bg-[var(--blog-bg,#fdf8f1)]"
     >
       <Container>
         <SectionHead
@@ -99,10 +100,14 @@ export function LatestBlogs() {
         </div>
       </Container>
 
-      {/* Wave ending transitioning into FAQ (tint) (§4) */}
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
-        <WaveDivider to="tint" shape="C" />
-      </div>
+      {/* Reference 3-Layer Static Wave transitioning into FAQ (Peach/Blush) */}
+      <ReferenceWave
+        colors={[
+          'var(--wave-blog-end-1)',
+          'var(--wave-blog-end-2)',
+          'var(--wave-blog-end-3)',
+        ]}
+      />
     </section>
   )
 }

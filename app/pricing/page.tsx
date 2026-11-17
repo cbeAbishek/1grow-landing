@@ -76,7 +76,10 @@ export default function PricingPage() {
         key="pricing-schemas"
       />
       <SiteHeader />
-      <main className="pt-20 sm:pt-28 pb-16">
+      <main
+        className="pt-20 sm:pt-28 pb-16"
+        style={{ backgroundColor: "var(--pricing-bg, #fff7ed)" }}
+      >
         <Pricing showHeading={true} />
       </main>
       <SiteFooter />

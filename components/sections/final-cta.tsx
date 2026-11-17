@@ -5,53 +5,59 @@ import { Heart, MessageSquare } from 'lucide-react'
 import { Container } from '@/components/layout/container'
 import { ActionButton } from '@/components/ui/action-button'
 import { Reveal } from '@/components/motion/reveal'
-import { WaveDivider } from '@/components/layout/wave-divider'
+import { ReferenceWave } from '@/components/layout/reference-wave'
 import { finalCtaData } from '@/content/landing'
 
 export function FinalCta() {
   return (
     <section
       id="contact"
-      data-band="dark"
-      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 text-center text-white overflow-hidden"
+      data-band="tint"
+      className="relative scroll-mt-24 pt-8 pb-52 sm:pt-10 sm:pb-60 lg:pt-12 lg:pb-72 text-center overflow-x-clip transition-colors duration-300"
       style={{
-        background: 'var(--bg-dark-band)',
+        backgroundColor: 'var(--faq-bg, #fff4ef)',
       }}
     >
-      {/* Ambient Blurred Floating Orbs */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-        aria-hidden="true"
-      >
+      {/* Background Decor: Soft Static Flat Blooms + Dot Grid */}
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden" aria-hidden="true">
+        {/* Top-left soft peach bloom */}
         <div
-          className="absolute -top-24 -left-24 size-80 rounded-full blur-[85px] opacity-40 blob-drift"
-          style={{ background: '#ff6b00' }}
+          className="absolute -top-24 -left-24 size-[520px] rounded-full opacity-60"
+          style={{ background: 'var(--faq-blob-peach, #ffe8df)' }}
         />
+        {/* Bottom-right soft lavender bloom */}
         <div
-          className="absolute -bottom-24 -right-24 size-96 rounded-full blur-[90px] opacity-35 blob-drift-delay"
-          style={{ background: '#f43f5e' }}
+          className="absolute bottom-24 -right-24 size-[560px] rounded-full opacity-50"
+          style={{ background: 'var(--faq-blob-lavender, #f6eefe)' }}
         />
+        {/* Faint 24px dot grid pattern */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[420px] rounded-full blur-[100px] opacity-20 blob-drift"
-          style={{ background: '#8b5cf6' }}
+          className="absolute inset-0 opacity-[0.035] dark:opacity-[0.05]"
+          style={{
+            backgroundImage: 'radial-gradient(currentColor 1.5px, transparent 1.5px)',
+            backgroundSize: '24px 24px',
+          }}
         />
       </div>
 
       <Container>
         <Reveal direction="scale" className="relative z-10 max-w-3xl mx-auto">
-          <span className="inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-orange-200 mb-6">
+          {/* Eyebrow Pill */}
+          <span className="inline-block rounded-full border border-[#ea580c]/25 bg-[#fff0ea] dark:bg-orange-950/60 px-4 py-1.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#ea580c] dark:text-orange-300 mb-6">
             Institutional Automation
           </span>
 
-          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight text-balance">
+          {/* Heading */}
+          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[var(--heading)] leading-tight text-balance">
             {finalCtaData.heading}
           </h2>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-white/85">
+          {/* Lead */}
+          <p className="mx-auto mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-[var(--ink-2)]">
             {finalCtaData.lead}
           </p>
 
-          {/* Action Button Pair: 56px Pill CTA + Secondary on Dark (§1, §2, §5) */}
+          {/* Action Button Pair: 56px Pill CTA + Secondary */}
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
             <ActionButton
               href="/wishlist"
@@ -64,24 +70,28 @@ export function FinalCta() {
 
             <ActionButton
               href={finalCtaData.whatsappUrl}
-              variant="secondary-dark"
-              icon={<MessageSquare className="size-5 text-emerald-400" aria-hidden="true" />}
+              variant="secondary"
+              icon={<MessageSquare className="size-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />}
               aria-label="Talk to 1Grow on WhatsApp"
             >
               {finalCtaData.secondaryCta}
             </ActionButton>
           </div>
 
-          <p className="mt-6 text-sm text-white/70">
+          <p className="mt-6 text-sm text-[var(--ink-3)] font-medium">
             Free 20-day trial · No credit card required · Instant setup in minutes
           </p>
         </Reveal>
       </Container>
 
-      {/* Wave ending transitioning into Footer (light) (§4) */}
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
-        <WaveDivider to="light" shape="A" />
-      </div>
+      {/* Reference 3-Layer Static Wave Transitioning into Footer (Sand) */}
+      <ReferenceWave
+        colors={[
+          'var(--wave-finalcta-end-1)',
+          'var(--wave-finalcta-end-2)',
+          'var(--wave-finalcta-end-3)',
+        ]}
+      />
     </section>
   )
 }

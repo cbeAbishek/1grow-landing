@@ -20,7 +20,6 @@ import {
   Camera,
 } from 'lucide-react'
 import { Logo } from '@/components/logo'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { navLinks, industries } from '@/content/landing'
 import { cn } from '@/lib/utils'
 
@@ -35,6 +34,63 @@ const iconMap: Record<string, React.ElementType> = {
   PartyPopper,
   CalendarHeart,
   Camera,
+}
+
+// Module accent colors matching 1Grow brand palette
+const INDUSTRY_COLOR_CONFIG: Record<
+  string,
+  { accent: string; bg: string; hoverBg: string }
+> = {
+  'dance-academy': {
+    accent: '#8b5cf6', // Training Purple
+    bg: 'rgba(139, 92, 246, 0.12)',
+    hoverBg: '#8b5cf6',
+  },
+  'music-school': {
+    accent: '#7c3aed', // Purple/Violet
+    bg: 'rgba(124, 58, 237, 0.12)',
+    hoverBg: '#7c3aed',
+  },
+  'swimming-academy': {
+    accent: '#0284c7', // Sky Blue
+    bg: 'rgba(2, 132, 199, 0.12)',
+    hoverBg: '#0284c7',
+  },
+  'martial-arts': {
+    accent: '#dc2626', // Crimson Red
+    bg: 'rgba(220, 38, 38, 0.12)',
+    hoverBg: '#dc2626',
+  },
+  'yoga-studio': {
+    accent: '#0d9488', // Analytics Teal / Green
+    bg: 'rgba(13, 148, 136, 0.12)',
+    hoverBg: '#0d9488',
+  },
+  'tuition-centre': {
+    accent: '#6366f1', // Indigo
+    bg: 'rgba(99, 102, 241, 0.12)',
+    hoverBg: '#6366f1',
+  },
+  'rental-business': {
+    accent: '#0176d3', // Rental Blue
+    bg: 'rgba(1, 118, 211, 0.12)',
+    hoverBg: '#0176d3',
+  },
+  'photography-studio': {
+    accent: '#ea580c', // Inventory Amber/Orange
+    bg: 'rgba(234, 88, 12, 0.12)',
+    hoverBg: '#ea580c',
+  },
+  'event-company': {
+    accent: '#e5484d', // Event Coral/Red
+    bg: 'rgba(229, 72, 77, 0.12)',
+    hoverBg: '#e5484d',
+  },
+  'wedding-planner': {
+    accent: '#e11d48', // Rose / Pink
+    bg: 'rgba(225, 29, 72, 0.12)',
+    hoverBg: '#e11d48',
+  },
 }
 
 export function SiteHeader() {
@@ -242,7 +298,7 @@ export function SiteHeader() {
                           aria-label="Industry solutions"
                         >
                           <div className="mb-3 flex items-center justify-between pb-2 border-b border-line">
-                            <p className="text-xs font-bold uppercase tracking-wider text-[var(--primary)]">
+                            <p className="text-xs font-bold uppercase tracking-wider text-[var(--accent-blue,#0176d3)]">
                               Tailored For Indian Businesses
                             </p>
                             <span className="text-xs text-[var(--ink-3)]">10 Specialized Workflows</span>
@@ -250,20 +306,36 @@ export function SiteHeader() {
                           <div className="grid grid-cols-2 gap-3">
                             {industries.map((ind) => {
                               const IconComponent = iconMap[ind.icon] || Package
+                              const colorCfg = INDUSTRY_COLOR_CONFIG[ind.id] || {
+                                accent: '#0176d3',
+                                bg: 'rgba(1, 118, 211, 0.12)',
+                                hoverBg: '#0176d3',
+                              }
                               return (
                                 <Link
                                   key={ind.id}
                                   href={ind.href}
                                   onClick={() => setSolutionsOpen(false)}
-                                  className="group flex items-start gap-3 rounded-[16px] p-2.5 transition-colors hover:bg-[var(--cloud-tint)] dark:hover:bg-white/5"
+                                  className="group flex items-start gap-3 rounded-[16px] p-2.5 transition-all duration-200 hover:bg-[var(--cloud-tint)] dark:hover:bg-white/5"
                                   role="menuitem"
                                 >
-                                  <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--cloud-tint)] dark:bg-white/10 text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-white transition-colors">
+                                  <div
+                                    className="grid size-9 shrink-0 place-items-center rounded-xl transition-all duration-200 group-hover:scale-105"
+                                    style={{
+                                      backgroundColor: colorCfg.bg,
+                                      color: colorCfg.accent,
+                                    }}
+                                  >
                                     <IconComponent className="size-4.5" aria-hidden="true" />
                                   </div>
                                   <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-[var(--heading)] group-hover:text-[var(--primary)] transition-colors">
-                                      {ind.name}
+                                    <p className="text-sm font-semibold text-[var(--heading)] transition-colors duration-150">
+                                      <span
+                                        className="transition-colors group-hover:opacity-90"
+                                        style={{ color: 'inherit' }}
+                                      >
+                                        {ind.name}
+                                      </span>
                                     </p>
                                     <p className="line-clamp-1 text-xs text-[var(--ink-2)] mt-0.5">
                                       {ind.description}
@@ -329,11 +401,6 @@ export function SiteHeader() {
 
           {/* Right: Actions Cluster (justify-self: end) */}
           <div className="justify-self-end pointer-events-auto flex items-center gap-3">
-            {/* Theme Toggle (44px round glass button) */}
-            <div className="grid place-items-center size-11 rounded-full bg-[var(--glass-bg,rgba(255,255,255,0.72))] border border-[var(--glass-border,rgba(3,45,96,0.08))] backdrop-blur-md shadow-xs">
-              <ThemeToggle />
-            </div>
-
             {/* Optional Login Pill (only rendered when NEXT_PUBLIC_APP_LOGIN_URL is defined) */}
             {appLoginUrl && (
               <a
@@ -364,8 +431,7 @@ export function SiteHeader() {
           <Link href="/" aria-label="1Grow home" className="flex items-center">
             <Logo />
           </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
+          <div className="flex items-center">
             <button
               onClick={() => setMobileOpen((v) => !v)}
               className="grid size-11 place-items-center rounded-full text-[var(--color-nav-text)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
@@ -432,20 +498,32 @@ export function SiteHeader() {
 
                 {/* Mobile Solutions */}
                 <div className="mt-6">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--primary)] mb-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--accent-blue,#0176d3)] mb-3">
                     Key Solutions
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    {industries.slice(0, 6).map((ind) => (
-                      <Link
-                        key={ind.id}
-                        href={ind.href}
-                        onClick={() => setMobileOpen(false)}
-                        className="rounded-xl bg-[var(--cloud-tint)] dark:bg-white/5 p-2 text-xs font-semibold text-[var(--heading)] hover:text-[var(--accent-blue,#0176d3)] truncate"
-                      >
-                        {ind.name}
-                      </Link>
-                    ))}
+                    {industries.slice(0, 6).map((ind) => {
+                      const colorCfg = INDUSTRY_COLOR_CONFIG[ind.id] || {
+                        accent: '#0176d3',
+                        bg: 'rgba(1, 118, 211, 0.12)',
+                        hoverBg: '#0176d3',
+                      }
+                      return (
+                        <Link
+                          key={ind.id}
+                          href={ind.href}
+                          onClick={() => setMobileOpen(false)}
+                          className="flex items-center gap-2 rounded-xl bg-[var(--cloud-tint)] dark:bg-white/5 p-2.5 text-xs font-semibold text-[var(--heading)] hover:text-[var(--accent-blue,#0176d3)] truncate"
+                        >
+                          <span
+                            className="size-2 rounded-full shrink-0"
+                            style={{ backgroundColor: colorCfg.accent }}
+                            aria-hidden="true"
+                          />
+                          <span className="truncate">{ind.name}</span>
+                        </Link>
+                      )
+                    })}
                   </div>
                 </div>
               </div>

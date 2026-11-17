@@ -38,7 +38,7 @@ export function Modules() {
       aria-labelledby="modules-heading"
       className="relative overflow-hidden pt-24 pb-36 sm:pt-28 sm:pb-44 text-white"
       style={{
-        background: 'var(--bg-dark-band)',
+        background: 'var(--t-navy-bg, var(--bg-dark-band))',
       }}
     >
       {/* Background glow and subtle dot grid */}
@@ -106,7 +106,7 @@ export function Modules() {
           <div className="lg:col-span-5 space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-bold text-white">
               <Icon className="size-4" />
-              <span>{current.badge}</span>
+              <span>{current.tab}</span>
             </div>
 
             <h3 className="font-display text-3xl sm:text-4xl font-bold text-white leading-tight">
@@ -249,9 +249,9 @@ export function Modules() {
         </div>
       </Container>
 
-      {/* Wave ending transitioning into WhyChooseUs (light) (§4) */}
+      {/* Wave ending transitioning into WhyChooseUs (mint) (§4) */}
       <div className="absolute inset-x-0 bottom-0 pointer-events-none">
-        <WaveDivider to="light" shape="A" />
+        <WaveDivider from="navy" to="mint" variant="F" />
       </div>
     </section>
   )

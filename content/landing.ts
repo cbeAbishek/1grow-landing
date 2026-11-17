@@ -195,7 +195,7 @@ export const heroData = {
   eyebrow: 'Built for Indian academies, rentals & events',
   headingBefore: 'Manage your entire business from ',
   headingGradient: 'one platform',
-  lead: '1Grow is a cloud ERP for Training Institutes, Rental Businesses, and Event Companies. Track leads, manage teams, collect payments, and view reports from one dashboard. Replace WhatsApp, Excel, and paper registers with one smart platform.',
+  lead: '1Grow brings training institutes, rental businesses, and event companies together on one platform. Manage operations, teams, payments, and reports without scattered spreadsheets.',
   primaryCta: 'Join Wishlist',
   secondaryCta: 'See how it works',
   microTrust: [

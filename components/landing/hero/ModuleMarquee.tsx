@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import {
   GraduationCap,
   Package,
@@ -13,8 +13,6 @@ import {
   Layers,
   MessageSquare,
   FileCheck,
-  Pause,
-  Play,
 } from 'lucide-react'
 import { SymbolSparkle } from './symbols/SymbolSet'
 
@@ -33,8 +31,6 @@ const LOOP_ITEMS = [
 ]
 
 export function ModuleMarquee() {
-  const [paused, setPaused] = useState(false)
-
   return (
     <div className="relative w-full pt-20 pb-12 overflow-hidden">
       {/* Heading per §7.1: "Everything your business runs on, in one place" */}
@@ -43,10 +39,7 @@ export function ModuleMarquee() {
       </h2>
 
       {/* Full-bleed marquee container with edge mask */}
-      <div
-        data-paused={paused ? 'true' : 'false'}
-        className="loop-marquee relative w-full py-4"
-      >
+      <div className="loop-marquee relative w-full py-4">
         <div className="loop-marquee-track">
           {/* First loop copy */}
           {LOOP_ITEMS.map((item, idx) => {
@@ -98,18 +91,6 @@ export function ModuleMarquee() {
             )
           })}
         </div>
-      </div>
-
-      {/* Pause/Play Button bottom-right (§7.1) */}
-      <div className="flex justify-end max-w-[1320px] mx-auto px-6 mt-3">
-        <button
-          onClick={() => setPaused((p) => !p)}
-          className="grid size-11 place-items-center rounded-full bg-white/70 dark:bg-white/10 hover:bg-white text-[var(--heading)] border border-[var(--glass-border,rgba(3,45,96,0.1))] shadow-xs transition-transform active:scale-95"
-          aria-label={paused ? 'Resume marquee scroll' : 'Pause marquee scroll'}
-          aria-pressed={paused}
-        >
-          {paused ? <Play className="size-4 fill-current" /> : <Pause className="size-4 fill-current" />}
-        </button>
       </div>
     </div>
   )

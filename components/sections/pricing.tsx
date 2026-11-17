@@ -41,8 +41,9 @@ export function Pricing({
     <section
       id={id}
       aria-labelledby="pricing-heading"
+      style={{ backgroundColor: "var(--pricing-bg, #fff7ed)" }}
       className={cn(
-        "relative isolate scroll-mt-24 overflow-hidden px-4 sm:px-6 lg:px-8 xl:px-10 py-20 sm:py-28",
+        "relative isolate scroll-mt-24 overflow-hidden px-4 sm:px-6 lg:px-8 xl:px-10 pt-16 sm:pt-24 pb-48 sm:pb-60 lg:pb-72 bg-[var(--pricing-bg,#fff7ed)]",
         className
       )}
     >

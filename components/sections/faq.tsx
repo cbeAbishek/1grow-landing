@@ -1,15 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
-import Link from 'next/link'
-import { ChevronDown, MessageSquare, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/layout/container'
-import { Reveal } from '@/components/motion/reveal'
-import { WaveDivider } from '@/components/layout/wave-divider'
 import { faqs } from '@/content/landing'
-import { cn } from '@/lib/utils'
+import { FaqHelpCard } from './faq/FaqHelpCard'
+import { FaqAccordionItem } from './faq/FaqAccordionItem'
 
 export function Faq() {
+  // Preserving single-open mode with default-open item 0 verbatim (§8.1)
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   const toggle = (idx: number) => {
@@ -21,105 +19,73 @@ export function Faq() {
       id="faq"
       data-band="tint"
       aria-labelledby="faq-heading"
-      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg-tint)]"
+      className="relative scroll-mt-24 pt-24 pb-8 sm:pt-28 sm:pb-10 lg:pb-12 overflow-x-clip transition-colors duration-300"
+      style={{
+        backgroundColor: 'var(--faq-bg, #fff4ef)',
+      }}
     >
-      <Container>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          {/* Left Column: Sticky Heading Block */}
-          <div className="lg:col-span-5 lg:sticky lg:top-28">
-            <span className="eyebrow inline-flex items-center gap-2 font-body text-sm font-bold uppercase tracking-wider text-[var(--primary)] bg-[var(--cloud-tint)] px-4 py-1.5 rounded-full border border-[var(--accent-orange-200)] mb-4">
-              FAQ
-            </span>
-            <h2
-              id="faq-heading"
-              className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--heading)] leading-tight text-balance"
-            >
-              Frequently asked questions
-            </h2>
-            <p className="mt-4 text-base sm:text-lg text-[var(--ink-2)] leading-relaxed">
-              Everything you need to know about 1Grow before getting started. Can&apos;t find what you&apos;re looking for?
-            </p>
+      {/* Background Decor: Soft Static Flat Blooms + Dot Grid (§8.2) */}
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden" aria-hidden="true">
+        {/* Top-right soft peach bloom */}
+        <div
+          className="absolute -top-24 -right-24 size-[540px] rounded-full opacity-60"
+          style={{ background: 'var(--faq-blob-peach, #ffe8df)' }}
+        />
+        {/* Bottom-left soft lavender bloom */}
+        <div
+          className="absolute bottom-24 -left-24 size-[580px] rounded-full opacity-50"
+          style={{ background: 'var(--faq-blob-lavender, #f6eefe)' }}
+        />
+        {/* Faint 24px dot grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.035] dark:opacity-[0.05]"
+          style={{
+            backgroundImage: 'radial-gradient(currentColor 1.5px, transparent 1.5px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+      </div>
 
-            <div className="mt-8 pt-6 border-t border-line/70">
-              <p className="text-base font-bold text-[var(--heading)] mb-2">Have a specific question?</p>
-              <a
-                href="https://wa.me/919566372450"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="link-arrow text-base font-semibold text-[var(--primary)]"
-              >
-                <MessageSquare className="size-4 mr-1 text-[var(--success)]" />
-                Still stuck? Chat with us on WhatsApp &rarr;
-              </a>
-            </div>
+      <Container className="relative z-10 max-w-[1280px] px-4 sm:px-6 lg:px-8">
+        {/* 12-Column Help Desk Layout (§8.1, §8.3) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+          {/* Left 5 Columns: Sticky Help Card */}
+          <div className="lg:col-span-5 lg:sticky lg:top-28 self-start">
+            <FaqHelpCard totalQuestions={faqs.length} />
           </div>
 
-          {/* Right Column: Salesforce Style Accordion List (§6, §7.16) */}
+          {/* Right 7 Columns: Individual Accordion Card Stack */}
           <div className="lg:col-span-7">
-            <Reveal direction="scale">
-              <div className="rounded-[28px] border border-line bg-[var(--surface)] shadow-[var(--shadow-2)] overflow-hidden divide-y divide-line">
-                {faqs.map((faq, i) => {
-                  const isOpen = openIndex === i
-                  return (
-                    <div
-                      key={faq.question}
-                      className={cn(
-                        'relative transition-colors duration-200',
-                        isOpen ? 'bg-[var(--surface)]' : 'hover:bg-[var(--cloud-tint)]',
-                      )}
-                    >
-                      {/* Left 4px Accent Bar on Open */}
-                      {isOpen && (
-                        <span className="absolute left-0 top-0 bottom-0 w-[4px] bg-[var(--primary)]" />
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => toggle(i)}
-                        className="flex w-full items-center justify-between gap-4 p-6 sm:p-7 text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--primary)] group"
-                        aria-expanded={isOpen}
-                        aria-controls={`faq-answer-${i}`}
-                      >
-                        <span
-                          className={cn(
-                            'font-display text-lg sm:text-xl font-bold transition-colors duration-150 pr-4',
-                            isOpen
-                              ? 'text-[var(--primary)]'
-                              : 'text-[var(--heading)] group-hover:text-[var(--primary)]',
-                          )}
-                        >
-                          {faq.question}
-                        </span>
-                        <ChevronDown
-                          className={cn(
-                            'size-5 shrink-0 text-[var(--ink-3)] transition-transform duration-250',
-                            isOpen && 'rotate-180 text-[var(--primary)]',
-                          )}
-                          aria-hidden="true"
-                        />
-                      </button>
-
-                      {isOpen && (
-                        <div
-                          id={`faq-answer-${i}`}
-                          className="px-6 pb-6 sm:px-7 sm:pb-7 text-base text-[var(--ink-2)] leading-relaxed border-t border-line/40 pt-4"
-                        >
-                          {faq.answer}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </Reveal>
+            <ul className="flex flex-col gap-3.5 list-none p-0 m-0">
+              {faqs.map((faq, i) => (
+                <FaqAccordionItem
+                  key={faq.question}
+                  faq={faq}
+                  index={i}
+                  isOpen={openIndex === i}
+                  onToggle={() => toggle(i)}
+                />
+              ))}
+            </ul>
           </div>
         </div>
-      </Container>
 
-      {/* Wave ending transitioning into Dark Final CTA (§4) */}
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
-        <WaveDivider to="dark" shape="B" />
-      </div>
+        {/* Orange Dotted Divider transitioning into CTA (§ Change 2) */}
+        <div
+          className="mt-14 sm:mt-18 lg:mt-20 flex items-center justify-center select-none"
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 360 8"
+            fill="none"
+            className="w-full max-w-[280px] sm:max-w-[340px] h-2 text-[#ea580c] select-none pointer-events-none"
+          >
+            {[...Array(15)].map((_, i) => (
+              <circle key={i} cx={12 + i * 24} cy="4" r="3.5" fill="currentColor" />
+            ))}
+          </svg>
+        </div>
+      </Container>
     </section>
   )
 }

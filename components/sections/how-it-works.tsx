@@ -1,94 +1,136 @@
 'use client'
 
-import React from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import {
-  UserPlus,
-  Building2,
-  LayoutGrid,
-  Users,
-  Rocket,
-  CheckCircle2,
-  ArrowRight,
-} from 'lucide-react'
+  useScroll,
+  useMotionValue,
+  animate,
+  useInView,
+} from 'framer-motion'
 import { Container } from '@/components/layout/container'
-import { SectionHead } from '@/components/layout/section-head'
-import { Reveal } from '@/components/motion/reveal'
-import { WaveDivider } from '@/components/layout/wave-divider'
+import { ReferenceWave } from '@/components/layout/reference-wave'
 import { steps } from '@/content/landing'
-import { cn } from '@/lib/utils'
-
-const stepIcons = [UserPlus, Building2, LayoutGrid, Users, Rocket]
+import { StepsBackgroundDecor } from './how-it-works/StepsBackgroundDecor'
+import { StepsHeader } from './how-it-works/StepsHeader'
+import { StepCard } from './how-it-works/StepCard'
+import { StepsThread } from './how-it-works/StepsThread'
+import { THREAD_MODE } from './how-it-works/stepsConfig'
 
 export function HowItWorks() {
+  const stageRef = useRef<HTMLOListElement>(null)
+  const [isDesktop, setIsDesktop] = useState(true)
+
+  // Media query listener for >= 1024px desktop vs tablet/mobile timeline
+  useEffect(() => {
+    const checkMq = () => {
+      setIsDesktop(window.innerWidth >= 1024)
+    }
+    checkMq()
+    window.addEventListener('resize', checkMq)
+    return () => window.removeEventListener('resize', checkMq)
+  }, [])
+
+  // Scroll-linked progress (§9.1)
+  const { scrollYProgress } = useScroll({
+    target: stageRef,
+    offset: isDesktop ? ['start 78%', 'end 40%'] : ['start 80%', 'end 50%'],
+  })
+
+  // Auto-play progress option (§9.1)
+  const autoProgress = useMotionValue(0)
+  const isStageInView = useInView(stageRef, { once: true, amount: 0.35 })
+
+  useEffect(() => {
+    if (THREAD_MODE === 'auto' && isStageInView) {
+      const controls = animate(autoProgress, 1, {
+        duration: 10,
+        ease: 'linear',
+      })
+      return controls.stop
+    }
+  }, [isStageInView, autoProgress])
+
+  const progress = THREAD_MODE === 'auto' ? autoProgress : scrollYProgress
+
   return (
     <section
       id="how-it-works"
       data-band="light"
       aria-labelledby="how-it-works-heading"
-      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg)]"
+      className="relative scroll-mt-24 pt-24 pb-52 sm:pt-28 sm:pb-60 lg:pb-72 overflow-x-clip transition-colors duration-300"
+      style={{
+        background:
+          'var(--how-it-works-bg, linear-gradient(180deg, #f8f4ff 0%, #f3ecff 100%))',
+      }}
     >
-      <Container>
-        <SectionHead
-          id="how-it-works-heading"
-          eyebrow="How It Works"
-          title="From sign-up to live operations in five simple steps"
-          lead="Getting started with 1Grow takes minutes. Follow this step-by-step process to move from setup to automated daily operations without technical complexity."
-        />
+      {/* Background Decor: Corner organic shapes + 24px dot pattern (§7.1) */}
+      <StepsBackgroundDecor />
 
-        {/* 5-Step Timeline Grid with Connecting Rail Line */}
-        <div className="relative mt-16">
-          <div
-            aria-hidden="true"
-            className="absolute top-8 left-16 right-16 hidden h-[3px] bg-gradient-to-r from-[var(--primary)] via-[#f43f5e] to-[#8b5cf6] lg:block opacity-40"
-          />
+      <Container className="relative z-10 max-w-[1360px] px-4 sm:px-6 lg:px-8">
+        {/* Section Header with Swoosh Underline (§7.2) */}
+        <StepsHeader />
 
-          <ol className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
-            {steps.map((step, i) => {
-              const Icon = stepIcons[i] || Rocket
-              return (
-                <Reveal key={step.number} delay={i * 0.09} as="li" className="h-full flex">
-                  <div className="group relative flex h-full flex-col justify-between w-full rounded-[28px] border border-line bg-[var(--surface)] p-7 shadow-[var(--shadow-1)] transition-all duration-300 hover:-translate-y-2 hover:border-[var(--accent-orange-200)] hover:shadow-[var(--shadow-2)] card-spotlight">
-                    <div>
-                      {/* Node circle on top */}
-                      <div className="flex items-center justify-between pb-5 border-b border-line/60">
-                        <div className="relative z-10 grid size-14 place-items-center rounded-2xl bg-[var(--cloud-tint)] text-[var(--primary)] font-display text-xl font-bold shadow-xs group-hover:bg-[var(--primary)] group-hover:text-white transition-colors duration-300">
-                          {step.number}
-                        </div>
-                        <div className="grid size-10 place-items-center rounded-xl bg-[var(--surface-tint)] text-[var(--primary)]">
-                          <Icon className="size-5" aria-hidden="true" />
-                        </div>
-                      </div>
+        {/* 5-Step Stage: Desktop Zig-Zag / Mobile Vertical Timeline (§6.1, §10) */}
+        {isDesktop ? (
+          <ol
+            ref={stageRef}
+            className="steps-stage relative w-full max-w-[1320px] mx-auto select-none"
+            style={{
+              height: 'calc(2.4 * var(--step-card-h, clamp(380px, 29vw, 420px)))',
+            }}
+          >
+            {/* Animated Dashed Purple Thread with Glowing Nodes & Traveller (§8) */}
+            <StepsThread
+              stageRef={stageRef}
+              progress={progress}
+              isDesktop={true}
+            />
 
-                      {/* Step Title & Description */}
-                      <div className="mt-5">
-                        <h3 className="font-display text-xl font-bold text-[var(--heading)] group-hover:text-[var(--primary)] transition-colors">
-                          {step.title}
-                        </h3>
-                        <p className="mt-2.5 text-base text-[var(--ink-2)] leading-relaxed">
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Micro UI visual badge */}
-                    <div className="mt-6 pt-4 border-t border-line/50">
-                      <div className="inline-flex items-center gap-2 rounded-full bg-[var(--cloud-tint)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">
-                        <span className="size-1.5 rounded-full bg-[var(--success)]" />
-                        <span>{step.visual}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Reveal>
-              )
-            })}
+            {/* 5 Tilted Glass-Pastel Cards in Zig-Zag rhythm (§6.1, §6.2) */}
+            {steps.map((step, idx) => (
+              <StepCard
+                key={step.number}
+                step={step}
+                index={idx}
+                progress={progress}
+                isDesktop={true}
+              />
+            ))}
           </ol>
-        </div>
+        ) : (
+          <ol
+            ref={stageRef}
+            className="steps-stage relative flex flex-col gap-14 sm:gap-16 w-full max-w-[420px] mx-auto py-6 select-none"
+          >
+            {/* Vertical Thread Overlay for Tablet & Mobile (§10) */}
+            <StepsThread
+              stageRef={stageRef}
+              progress={progress}
+              isDesktop={false}
+            />
+
+            {/* 5 Cards in Alternating Vertical Alignment (§10) */}
+            {steps.map((step, idx) => (
+              <StepCard
+                key={step.number}
+                step={step}
+                index={idx}
+                progress={progress}
+                isDesktop={false}
+              />
+            ))}
+          </ol>
+        )}
       </Container>
 
-      {/* Wave ending transitioning into Features Overview (tint) (§4) */}
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
-        <WaveDivider to="tint" shape="C" />
-      </div>
+      {/* Reference 3-Layer Static Wave transitioning into Why Choose Us */}
+      <ReferenceWave
+        colors={[
+          'var(--wave-howitworks-end-1)',
+          'var(--wave-howitworks-end-2)',
+          'var(--wave-howitworks-end-3)',
+        ]}
+      />
     </section>
   )
 }

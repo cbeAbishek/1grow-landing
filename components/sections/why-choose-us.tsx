@@ -1,44 +1,9 @@
 'use client'
 
 import React from 'react'
-import {
-  Users,
-  Wallet,
-  Bell,
-  BarChart3,
-  ShieldCheck,
-  Layers,
-  HeadphonesIcon,
-  Check,
-  ArrowRight,
-  Sparkles,
-} from 'lucide-react'
 import { Container } from '@/components/layout/container'
-import { SectionHead } from '@/components/layout/section-head'
-import { Reveal } from '@/components/motion/reveal'
-import { WaveDivider } from '@/components/layout/wave-divider'
-import { reasons } from '@/content/landing'
-import { cn } from '@/lib/utils'
-
-const iconMap: Record<string, React.ElementType> = {
-  Users,
-  Wallet,
-  Bell,
-  BarChart3,
-  ShieldCheck,
-  Layers,
-  HeadphonesIcon,
-  Check,
-}
-
-const accentCycles = [
-  'card-accent-blue',
-  'card-accent-orange',
-  'card-accent-coral',
-  'card-accent-teal',
-  'card-accent-green',
-  'card-accent-purple',
-]
+import { ReferenceWave } from '@/components/layout/reference-wave'
+import { WhyUsBento } from './why-choose-us/WhyUsBento'
 
 export function WhyChooseUs() {
   return (
@@ -46,91 +11,94 @@ export function WhyChooseUs() {
       id="why-choose-us"
       data-band="light"
       aria-labelledby="why-choose-heading"
-      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg)]"
+      className="relative scroll-mt-24 pt-24 pb-52 sm:pt-28 sm:pb-60 lg:pb-72 overflow-x-clip transition-colors duration-300"
+      style={{
+        backgroundColor: 'var(--whyus-bg, #eff9f1)',
+      }}
     >
-      <Container>
-        <SectionHead
-          id="why-choose-heading"
-          eyebrow="Why Choose Us"
-          title="Why academies choose 1Grow"
-          lead={
-            <>
-              Built by people who know the academy and event business inside out. 1Grow helps you save
-              time, eliminate double-bookings, and scale multi-branch operations with institutional clarity.{' '}
-              <strong className="text-[var(--heading)] font-semibold">Here is why owners pick us.</strong>
-            </>
-          }
+      {/* Background Decor: Soft Static Flat Blooms + 24px Dot Grid (§6.7) */}
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden" aria-hidden="true">
+        {/* Top-left soft green bloom */}
+        <div
+          className="absolute -top-24 -left-24 size-[520px] rounded-full opacity-60"
+          style={{ background: 'var(--whyus-blob-green, #dcf1e1)' }}
         />
+        {/* Bottom-right mint bloom */}
+        <div
+          className="absolute bottom-24 -right-24 size-[580px] rounded-full opacity-50"
+          style={{ background: 'var(--whyus-blob-mint, #e2f7ea)' }}
+        />
+        {/* Faint 24px dot grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.035] dark:opacity-[0.05]"
+          style={{
+            backgroundImage: 'radial-gradient(currentColor 1.5px, transparent 1.5px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+      </div>
 
-        {/* 8-Card Grid with Featured First Card (§5, §6) */}
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7">
-          {reasons.map((reason, i) => {
-            const Icon = iconMap[reason.icon] || Users
-            const isFeatured = reason.featured
-            const accentClass = accentCycles[i % accentCycles.length]
+      <Container className="relative z-10 max-w-[1280px] px-4 sm:px-6 lg:px-8">
+        {/* Section Header with Eyebrow, H2, Sparkles, and Lead (§6.1, §6.7) */}
+        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
+          {/* Eyebrow Pill */}
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300/40 shadow-xs mb-4">
+            WHY CHOOSE US
+          </div>
 
-            return (
-              <Reveal
-                key={reason.title}
-                delay={i * 0.06}
-                className={isFeatured ? 'sm:col-span-2 lg:col-span-2 flex' : 'flex'}
-              >
-                <div
-                  className={cn(
-                    'accent-card group relative flex flex-col justify-between w-full rounded-[28px] p-8 card-spotlight',
-                    accentClass,
-                  )}
-                >
-                  <div className="dec-circle" aria-hidden="true" />
+          {/* Heading with Decorative Sparkles */}
+          <div className="relative inline-block text-center">
+            {/* Left Sparkle */}
+            <svg
+              viewBox="0 0 24 24"
+              fill="#10b981"
+              className="absolute -top-4 -left-7 size-5 sm:size-6 opacity-75 hidden sm:block"
+              aria-hidden="true"
+            >
+              <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+            </svg>
 
-                  {/* Top 3px Accent Bar */}
-                  <span className="absolute top-0 left-0 right-0 h-[3.5px] bg-[var(--card-accent-icon)] origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100" />
+            <h2
+              id="why-choose-heading"
+              className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--heading)] leading-[1.14] text-balance"
+              style={{
+                fontSize: 'clamp(2.25rem, 1.6rem + 2.8vw, 3.75rem)',
+              }}
+            >
+              Why academies choose 1Grow
+            </h2>
 
-                  <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="icon-blob shadow-sm">
-                        <Icon
-                          className="size-7"
-                          style={{ color: 'var(--card-accent-icon)' }}
-                          aria-hidden="true"
-                        />
-                      </div>
-                      {reason.microLabel && (
-                        <span className="rounded-full bg-[var(--cloud-tint)] px-3 py-1 text-xs font-bold text-[var(--primary)] border border-[var(--accent-orange-200)]">
-                          {reason.microLabel}
-                        </span>
-                      )}
-                    </div>
+            {/* Right Sparkle & Squiggle */}
+            <svg
+              viewBox="0 0 24 24"
+              fill="#f59e0b"
+              className="absolute -top-3 -right-8 size-5 sm:size-6 opacity-75 hidden sm:block"
+              aria-hidden="true"
+            >
+              <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+            </svg>
+          </div>
 
-                    <h3
-                      className={cn(
-                        'font-display font-bold text-[var(--heading)] group-hover:text-[var(--card-accent-icon)] transition-colors',
-                        isFeatured ? 'text-2xl sm:text-3xl leading-snug' : 'text-xl leading-snug',
-                      )}
-                    >
-                      {reason.title}
-                    </h3>
-
-                    <p className="mt-3 text-base text-[var(--ink-2)] leading-relaxed">
-                      {reason.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/10 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--ink-3)]">
-                    <span>Institutional Reliability</span>
-                    <Check className="size-4 text-[var(--success)] stroke-[3]" />
-                  </div>
-                </div>
-              </Reveal>
-            )
-          })}
+          {/* Lead Paragraph */}
+          <p className="mt-4 text-base sm:text-lg text-[var(--ink-2)] leading-relaxed text-balance">
+            Built by people who know the academy and event business inside out. 1Grow helps you save
+            time, eliminate double-bookings, and scale multi-branch operations with institutional clarity.{' '}
+            <strong className="text-[var(--heading)] font-semibold">Here is why owners pick us.</strong>
+          </p>
         </div>
+
+        {/* Asymmetric 4-Card Bento Grid with In-Place View-More Swap (§6.2, §6.5) */}
+        <WhyUsBento />
       </Container>
 
-      {/* Wave ending transitioning into Pricing (tint) (§4) */}
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
-        <WaveDivider to="tint" shape="B" />
-      </div>
+      {/* Reference 3-Layer Static Wave Transitioning into Pricing (Sand) (§5, §6.7) */}
+      <ReferenceWave
+        colors={[
+          'var(--wave-whyus-end-1)',
+          'var(--wave-whyus-end-2)',
+          'var(--wave-whyus-end-3)',
+        ]}
+      />
     </section>
   )
 }

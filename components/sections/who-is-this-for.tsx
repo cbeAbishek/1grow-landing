@@ -1,175 +1,126 @@
 'use client'
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import {
-  GraduationCap,
-  Music,
-  Waves,
-  Swords,
-  Heart,
-  BookOpen,
-  Package,
-  PartyPopper,
-  CalendarHeart,
-  Camera,
-  ArrowRight,
-} from 'lucide-react'
+import React from 'react'
 import { Container } from '@/components/layout/container'
-import { SectionHead } from '@/components/layout/section-head'
-import { Reveal } from '@/components/motion/reveal'
-import { WaveDivider } from '@/components/layout/wave-divider'
+import { ReferenceWave } from '@/components/layout/reference-wave'
 import { industries } from '@/content/landing'
-import { cn } from '@/lib/utils'
+import { IndustryStage } from '@/components/landing/industry/IndustryStage'
+import { SymbolSparkle } from '@/components/landing/hero/symbols/SymbolSet'
 
-const iconMap: Record<string, React.ElementType> = {
-  GraduationCap,
-  Music,
-  Waves,
-  Swords,
-  Heart,
-  BookOpen,
-  Package,
-  PartyPopper,
-  CalendarHeart,
-  Camera,
+/**
+ * Flag controlling whether Section 3 ends with the 3-layer reference wave (§2, §8.2)
+ * When false, the bottom wave is omitted and Section 4's top blend alone provides the transition.
+ */
+export const INDUSTRY_END_WAVE = true
+
+function HeaderBurst({ className }: { className?: string }) {
+  return (
+    <svg
+      width="44"
+      height="44"
+      viewBox="0 0 44 44"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M8 36L4 40"
+        stroke="#ea580c"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16 28L30 14"
+        stroke="#ff7a00"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M34 10L40 4"
+        stroke="#ea580c"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
 }
 
-const accentCycles = [
-  'card-accent-blue',
-  'card-accent-orange',
-  'card-accent-coral',
-  'card-accent-teal',
-  'card-accent-green',
-  'card-accent-purple',
-]
-
-type CategoryFilter = 'all' | 'training' | 'rental' | 'event'
-
 export function WhoIsThisFor() {
-  const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all')
-
-  const filteredIndustries =
-    activeFilter === 'all'
-      ? industries
-      : industries.filter((ind) => ind.category === activeFilter)
-
   return (
     <section
       id="industries"
-      data-band="light"
+      data-band="sand"
       aria-labelledby="industries-heading"
-      className="relative scroll-mt-24 pt-24 pb-36 sm:pt-28 sm:pb-44 bg-[var(--bg)]"
+      className="relative scroll-mt-24 pt-16 sm:pt-20 pb-[clamp(96px,14vw,240px)] bg-[var(--t-sand-bg,#fdf8f1)] overflow-x-clip transition-colors duration-300"
     >
-      <Container>
-        <SectionHead
-          id="industries-heading"
-          eyebrow="Industry Solutions"
-          title="Built for your industry"
-          lead={
-            <>
-              1Grow works for training academies, rental firms, and event planners across India.
-              Each industry gets custom workflows, reports, and tools designed for your business type.{' '}
-              <strong className="text-[var(--heading)] font-semibold">
-                Pick your industry below to see how 1Grow helps.
-              </strong>
-            </>
-          }
-        />
+      {/* Decorative Background Blobs matching reference (§5.1) */}
+      <div
+        className="absolute top-20 -left-20 w-72 h-72 rounded-full bg-[var(--ind-blob-lavender,#e8e0fd)] opacity-50 blur-3xl pointer-events-none"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute top-32 -right-20 w-80 h-80 rounded-full bg-[var(--ind-blob-peach,#fed7aa)] opacity-45 blur-3xl pointer-events-none"
+        aria-hidden="true"
+      />
 
-        {/* Filter Segmented Control */}
-        <div className="flex justify-center mb-12" role="tablist" aria-label="Filter industry solutions">
-          <div className="inline-flex items-center gap-2 rounded-full border border-line bg-[var(--surface-2)] p-1.5 shadow-xs">
-            {(
-              [
-                { id: 'all', label: 'All Solutions' },
-                { id: 'training', label: 'Training Institutes' },
-                { id: 'rental', label: 'Rental Businesses' },
-                { id: 'event', label: 'Event Companies' },
-              ] as const
-            ).map((filter) => {
-              const isActive = activeFilter === filter.id
-              return (
-                <button
-                  key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                  role="tab"
-                  aria-selected={isActive}
-                  className={cn(
-                    'h-10 px-5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--primary)]',
-                    isActive
-                      ? 'bg-[var(--primary)] text-white shadow-sm'
-                      : 'text-[var(--ink-2)] hover:text-[var(--heading)] hover:bg-[var(--surface)]',
-                  )}
-                >
-                  {filter.label}
-                </button>
-              )
-            })}
+      {/* Decorative Sparkles & Bursts */}
+      <div
+        className="absolute top-16 left-8 sm:left-20 pointer-events-none text-orange-400 opacity-75"
+        aria-hidden="true"
+      >
+        <SymbolSparkle size={32} />
+      </div>
+      <div
+        className="absolute top-14 right-8 sm:right-24 pointer-events-none opacity-85"
+        aria-hidden="true"
+      >
+        <HeaderBurst />
+      </div>
+
+      <Container className="relative z-10">
+        {/* Header Block (Normal Flow, NOT Pinned §5.1, tightened spacing §7.2.5) */}
+        <header className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
+          {/* Eyebrow Pill */}
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider bg-[var(--ind-orange-soft,#fff3e6)] text-[#ea580c] border border-[#ea580c]/25 shadow-xs mb-4">
+            INDUSTRY SOLUTIONS
           </div>
-        </div>
 
-        {/* 10 Industry Cards in 2/3 column layout with accent colors (§3, §5, §6) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 items-stretch">
-          {filteredIndustries.map((ind, idx) => {
-            const IconComponent = iconMap[ind.icon] || Package
-            const accentClass = accentCycles[idx % accentCycles.length]
+          <h2
+            id="industries-heading"
+            className="font-display text-3xl sm:text-4xl lg:text-[52px] font-bold text-[var(--ind-ink,#1a1820)] dark:text-white tracking-tight leading-[1.12]"
+          >
+            Built for your industry
+          </h2>
 
-            return (
-              <Reveal key={ind.id} delay={(idx % 3) * 0.08} className="flex">
-                <div
-                  className={cn(
-                    'accent-card group flex flex-col justify-between w-full p-8 rounded-[28px] card-spotlight',
-                    accentClass,
-                  )}
-                >
-                  {/* Decorative soft bleeding corner circle (§5) */}
-                  <div className="dec-circle" aria-hidden="true" />
-
-                  <div>
-                    {/* 64px Squircle with wiggle hover (§5, §6) */}
-                    <div className="icon-blob mb-6 shadow-sm">
-                      <IconComponent
-                        className="size-7"
-                        style={{ color: 'var(--card-accent-icon)' }}
-                        aria-hidden="true"
-                      />
-                    </div>
-
-                    {/* Title 24px Outfit 600 */}
-                    <h3 className="font-display text-[24px] font-semibold text-[var(--heading)] leading-tight">
-                      {ind.name}
-                    </h3>
-
-                    {/* Description 17px/28px — NO LINE CLAMP */}
-                    <p className="mt-3 text-[17px] leading-[28px] text-[var(--ink-2)]">
-                      {ind.description}
-                    </p>
-                  </div>
-
-                  {/* Learn More link with sliding arrow */}
-                  <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/10">
-                    <Link
-                      href={ind.href}
-                      className="link-arrow text-[16px] font-bold"
-                      style={{ color: 'var(--card-accent-icon)' }}
-                      aria-label={`Learn more about 1Grow for ${ind.name}`}
-                    >
-                      <span>Learn more</span>
-                      <ArrowRight className="size-4.5" aria-hidden="true" />
-                    </Link>
-                  </div>
-                </div>
-              </Reveal>
-            )
-          })}
-        </div>
+          <p className="mt-4 text-[16px] sm:text-[18px] leading-[26px] sm:leading-[28px] text-[var(--ind-ink-2,#5a5360)] dark:text-zinc-300">
+            1Grow works for training academies, rental firms, and event planners across India.
+            Each industry gets custom workflows, reports, and tools designed for your business type.{' '}
+            <strong className="text-[var(--ind-ink,#1a1820)] dark:text-white font-semibold">
+              Pick your industry below to see how 1Grow helps.
+            </strong>
+          </p>
+        </header>
       </Container>
 
-      {/* Wave ending transitioning into Problems section (tint) (§4) */}
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
-        <WaveDivider to="tint" shape="B" />
+      {/* Scroll-Scrubbed Stage: Always renders all 10 industries in data order (§5.1).
+          Filter tabs and filter swap logic removed completely. */}
+      <div className="relative w-full">
+        <IndustryStage
+          industries={industries}
+          caption="Pick your industry below to see how 1Grow helps."
+        />
       </div>
+
+      {/* Section 3 -> Section 5 Reference 3-Layer Static Wave */}
+      {INDUSTRY_END_WAVE && (
+        <ReferenceWave
+          colors={[
+            'var(--wave-ref-bottom-1)',
+            'var(--wave-ref-bottom-2)',
+            'var(--wave-ref-bottom-3, #fff2f5)',
+          ]}
+        />
+      )}
     </section>
   )
 }
